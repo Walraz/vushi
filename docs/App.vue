@@ -17,7 +17,7 @@
     MyTextfield(autosuggestion icon="clear" :options="options" label="Select" :validate="{required: true}" v-model="selected")
     MyTextfield(:options="optionsArray" autosuggestion icon="clear" label="Select" v-model="selected2")
     MyTextfield(:options="options" icon="clear" label="Select" :validate="{required: true}" v-model="selected")
-    MyTextfield(:options="optionsArray" label="Select" icon="clear" v-model="selected2")
+    MyTextfield(:options="optionsArray" icon="clear" label="Select" v-model="selected2")
 </template>
 
 

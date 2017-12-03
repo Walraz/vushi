@@ -12,6 +12,7 @@ export default {
       return validated.find(r => r.error) || { error: false, message: '' }
     },
     $_validateOn() {
+      if (this.disabled) return false
       if (this.validateOn !== null) return this.validateOn
       if (this.options) return true
       return this.isDirty

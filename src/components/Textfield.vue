@@ -7,20 +7,20 @@
       label.vu-textfield__label(:class="labelClasses" v-if="label")
         | {{ label }}
         span.vu-textfield__label--required(v-if="required") *
-      .vu-textfield__icon
+      .vu-textfield__icon(v-show="(showIcon || options || icon === 'visibility')")
         .vu-textfield__icon--loading
           transition(name="scale" mode="out-in")
             Spinner(v-if="!isOptions" :key="!isOptions")
         .vu-textfield__icon--arrow(:class="arrowClasses" @click.stop.prevent="toggleDropdown")
             Icon(v-if="options && isOptions") keyboard_arrow_down
-        .vu-textfield__icon--clear(@click="clearInput")
+        .vu-textfield__icon--clear(@click="clearInput" v-if="!disabled")
           transition(name="scale" mode="out-in")
             Icon(v-if="showIcon && isOptions || showOptionClear && isOptions" :key="showOptionClear") close
-        .vu-textfield__icon--visibility(@click="toggleVisibility")
+        .vu-textfield__icon--visibility(@click="toggleVisibility" v-if="!disabled")
           transition(name="scale" mode="out-in")
             Icon(v-if="icon === 'visibility' && type === 'password' && !isVisibility" :key="isVisibility") visibility
             Icon(v-else-if="icon === 'visibility' && type === 'password' && isVisibility") visibility_off
-      input.vu-textfield__input(:class="inputClasses" @keydown.tab="onEnter" @keydown.down="onKeyDown" @keydown.up="onKeyUp" @keydown.prevent.enter="onEnter" :tabindex="tabindex" :readonly="isReadonly" :maxLength="maxLength" :placeholder="placeholder" @input="onInput" :disabled="disabled" @focus="onFocus" @blur="onBlur")
+      input.vu-textfield__input(:class="inputClasses" @keydown.esc="inputEl.blur" @keydown.down="onKeyDown" @keydown.up="onKeyUp" @keydown.prevent.enter="onEnter" :tabindex="tabindex" :readonly="isReadonly" :maxLength="maxLength" :placeholder="placeholder" @input="onInput" :disabled="disabled" @focus="onFocus" @blur="onBlur")
     transition(name="fadeBottom")
       .vu-textfield__error(v-if="$_validate.error && $_validateOn")
         Icon.vu-textfield__error--icon info_outline
@@ -140,7 +140,9 @@ export default {
       this.showDropdown = false
       if (this.autosuggestion) {
         const key = !this.isObjectArray ? 'Value' : 'Label'
-        const result = this.getItem(this.autosuggestionValue, key)
+        let result = false
+        if (this.optionsList.length === 1) result = this.optionsList[0]
+        else result = this.getItem(this.autosuggestionValue, key)
         if (result) {
           this.setSelectedItemIndex(this.validateOptionLabel(result))
           this.inputEl.value = this.validateOptionLabel(result)
@@ -152,10 +154,14 @@ export default {
       }
     }, 150),
     emptyState() {
-      this.inputEl.value = ''
-      this.autosuggestionValue = ''
-      this.selectedItemIndex = -1
-      this.$emit('input', null)
+      if (this.lastValidOption) {
+        this.onSelect(this.getItem(this.value))
+      } else {
+        this.inputEl.value = ''
+        this.autosuggestionValue = ''
+        this.selectedItemIndex = -1
+        this.$emit('input', null)
+      }
     },
     clearInput: debounce(function() {
       this.emptyState()
@@ -222,10 +228,7 @@ export default {
     arrowClasses() {
       return {
         'vu-textfield__icon--arrow--active': this.showDropdown,
-        'vu-textfield__icon--arrow--hide':
-          this.showOptionClear || (this.icon === 'clear' && this.isFocused)
-            ? this.autosuggestionValue.length
-            : !this.options,
+        'vu-textfield__icon--arrow--hide': this.showOptionClear,
       }
     },
     labelClasses() {
@@ -258,7 +261,9 @@ export default {
         this.icon === 'clear' &&
         this.options &&
         !this.disabled &&
-        this.autosuggestionValue.length &&
+        (this.autosuggestion
+          ? this.autosuggestionValue.length
+          : this.isFocused && this.isInputValue) &&
         this.type === 'text'
       )
     },
@@ -298,6 +303,10 @@ export default {
     required: Boolean,
     readonly: Boolean,
     fullWidth: Boolean,
+    lastValidOption: {
+      type: Boolean,
+      default: () => false,
+    },
   },
 }
 </script>
@@ -467,8 +476,8 @@ export default {
         color $disabled-color
 
     .vu-textfield__icon
-      visibility hidden
       pointer-events none
+      opacity 0.2
 </style>
 
 
