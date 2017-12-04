@@ -28,7 +28,7 @@ export default {
       }
     },
     setTabindex() {
-      return this.loading || this.disabled ? -1 : 0
+      return this.loading || this.disabled ? this.tabindex : 0
     },
   },
 
@@ -43,6 +43,10 @@ export default {
     disabled: Boolean,
     loading: Boolean,
     fullWidth: Boolean,
+    tabindex: {
+      type: [Number, String],
+      default: () => 0,
+    },
   },
 }
 </script>

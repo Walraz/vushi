@@ -18,6 +18,9 @@
     MyTextfield(:options="optionsArray" autosuggestion icon="clear" label="Select" v-model="selected2")
     MyTextfield(:options="options" icon="clear" label="Select" :validate="{required: true}" v-model="selected")
     MyTextfield(:options="optionsArray" icon="clear" label="Select" v-model="selected2")
+    Checkbox(disabled v-model="check" checkValue="Red" label="Red")
+    Checkbox(v-model="check" checkValue="Blue")
+    Checkbox(disabled v-model="CheckBool")
 </template>
 
 
@@ -27,11 +30,13 @@ import MyButton from './MyButton'
 import Spinner from '../src/components/Spinner'
 import Icon from '../src/components/Icon'
 import Textfield from '@/components/Textfield'
+import Checkbox from '@/components/Checkbox'
 
 export default {
   name: 'app',
 
   components: {
+    Checkbox,
     MyTextfield,
     MyButton,
     Spinner,
@@ -41,11 +46,14 @@ export default {
 
   data() {
     return {
+      CheckBool: true,
+      check: [],
       selected: null,
       selected2: null,
       validated: false,
       text: 'test',
       loading: false,
+      multiple: [],
       model: {
         password: 'test',
         username: 'test',

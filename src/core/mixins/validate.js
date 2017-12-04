@@ -21,6 +21,7 @@ export default {
 
   methods: {
     $_validateConvert(value) {
+      if (Array.isArray(value)) return value.length ? ' ' : ''
       if (value === (value | 0)) return value.toString()
       if (typeof value === 'number') return value.toString()
       if (value === true || value === false) return ' '
