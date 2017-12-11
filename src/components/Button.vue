@@ -1,6 +1,6 @@
 <template lang="pug">
   button.vu-button(:class="classes" @click="onClick" :disabled="disabled" :data-loading="loading" :tabindex="setTabindex")
-    transition(name="scale")
+    transition(name="vuScale")
       .vu-button__loading(v-if="loading")
         slot(name="loading")
           Spinner

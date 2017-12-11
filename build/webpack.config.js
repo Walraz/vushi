@@ -7,9 +7,11 @@ const resolve = dir => path.join(__dirname, '..', dir)
 const CLASS_NAMESPACE = 'su'
 const ROOT_PATH = resolve('/')
 
-const componentFiles = glob.sync(resolve('/src/components/**/*.vue'))
+const componentFiles = glob.sync(resolve('/src/components/*.vue'))
+const componentFilesNested = glob.sync(resolve('/src/components/**/*.js'))
 
 const components = {}
+const componentsNested = {}
 
 componentFiles.forEach(path => {
   const fileSplit = path.split('/')
@@ -19,6 +21,14 @@ componentFiles.forEach(path => {
   Object.assign(components, {
     [`lib/${componentName}`]: path,
   })
+})
+
+componentFilesNested.forEach(path => {
+  const fileSplit = path.split('/')
+  const componentName = fileSplit[fileSplit.length - 2]
+    .toLowerCase()
+    .split('.')[0]
+  Object.assign(componentsNested, { [`lib/${componentName}`]: path })
 })
 
 module.exports = {
@@ -132,6 +142,7 @@ if (process.env.NODE_ENV === 'production') {
   module.exports.entry = {
     core: `${ROOT_PATH}/src/main.js`,
     ...components,
+    ...componentsNested,
   }
   module.exports.plugins = (module.exports.plugins || []).concat([
     new webpack.DefinePlugin({

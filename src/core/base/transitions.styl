@@ -1,27 +1,33 @@
-.scale-enter-active, .scale-leave-active
+.vuScale-enter-active, .vuScale-leave-active
   transform-origin center center
   transition --transition(), --transition(opacity)
 
-.scale-enter, .scale-leave-to
+.vuScale-enter, .vuScale-leave-to
   transform scale(0)
   opacity 0
 
-.fade-enter-active, .fade-leave-active
+.vuFade-enter-active, .vuFade-leave-active
   transition --transition(opacity)
 
-.fade-enter, .fade-leave-to
+.vuFade-enter, .vuFade-leave-to
   opacity 0
 
-.fadeBottom-enter-active, .fadeBottom-leave-active
+.vuFadeBottom-enter-active, .vuFadeBottom-leave-active
   transition --transition(), --transition(opacity)
 
-.fadeBottom-enter, .fadeBottom-leave-to
+.vuFadeBottom-enter, .vuFadeBottom-leave-to
   transform translateY(8px)
   opacity 0
 
-.fadeTop-enter-active, .fadeTop-leave-active
+.vuFadeTop-enter-active, .vuFadeTop-leave-active
   transition --transition(), --transition(opacity)
 
-.fadeTop-enter, .fadeTop-leave-to
+.vuFadeTop-enter, .vuFadeTop-leave-to
   transform translateY(-8px)
   opacity 0
+
+.vuDropdown-enter-active, .vuDropdown-leave-active
+  transition --transition()
+
+.vuDropdown-enter, .vuDropdown-leave-to
+  transform rotate(45deg) scale(0.45)

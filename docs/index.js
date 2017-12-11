@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import App from './App'
-import Sushi from '../dist/core'
+import Sushi from '@/main'
 
 Vue.use(Sushi)
 

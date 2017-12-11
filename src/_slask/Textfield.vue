@@ -1,7 +1,7 @@
 <template lang="pug">
   .vu-textfield(:class="classes")
     .vu-textfield__input-wrapper
-      transition(name="fadeTop")
+      transition(name="vuFadeTop")
         .vu-dropdown(v-if="showDropdown")
           .vu-dropdown__item(:class="{ 'vu-dropdown__item--selected': isSelected(item), 'vu-dropdown__item--focused': isItemFocused($index), 'vu-dropdown__item--no-result': item.$_noResult }" v-for="(item, $index) in optionsList" :key="$index" @mousedown.prevent.stop="onSelect(item)" v-html="highlightText(validateOptionLabel(item))")
       label.vu-textfield__label(:class="labelClasses" v-if="label")
@@ -9,19 +9,19 @@
         span.vu-textfield__label--required(v-if="required") *
       .vu-textfield__icon(v-show="(showIcon || options || icon === 'visibility')")
         .vu-textfield__icon--loading
-          transition(name="scale" mode="out-in")
+          transition(name="vuScale" mode="out-in")
             Spinner(v-if="!isOptions" :key="!isOptions")
         .vu-textfield__icon--arrow(:class="arrowClasses" @click.stop.prevent="toggleDropdown")
             Icon(v-if="options && isOptions") keyboard_arrow_down
         .vu-textfield__icon--clear(@click="clearInput" v-if="!disabled")
-          transition(name="scale" mode="out-in")
+          transition(name="vuScale" mode="out-in")
             Icon(v-if="showIcon && isOptions || showOptionClear && isOptions" :key="showOptionClear") close
         .vu-textfield__icon--visibility(@click="toggleVisibility" v-if="!disabled")
-          transition(name="scale" mode="out-in")
+          transition(name="vuScale" mode="out-in")
             Icon(v-if="icon === 'visibility' && type === 'password' && !isVisibility" :key="isVisibility") visibility
             Icon(v-else-if="icon === 'visibility' && type === 'password' && isVisibility") visibility_off
       input.vu-textfield__input(:class="inputClasses" @keydown.esc="inputEl.blur" @keydown.down="onKeyDown" @keydown.up="onKeyUp" @keydown.prevent.enter="onEnter" :tabindex="tabindex" :readonly="isReadonly" :maxLength="maxLength" :placeholder="placeholder" @input="onInput" :disabled="disabled" @focus="onFocus" @blur="onBlur")
-    transition(name="fadeBottom")
+    transition(name="vuFadeBottom")
       .vu-textfield__error(v-if="$_validate.error && $_validateOn")
         Icon.vu-textfield__error--icon info_outline
         | {{ $_validate.message }}

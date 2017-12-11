@@ -1,11 +1,10 @@
 <template lang="pug">
   label.vu-checkbox(:class="{ 'vu-checkbox--disabled' : disabled }")
-    input.vu-checkbox__input(type="checkbox" :disabled="disabled" :value="checkValue" v-model="inputValue")
-    .vu-checkbox__container(:class="containerClasses" :tabindex="tabindex" @keydown.space.enter="select")
+    input.vu-checkbox__input(type="checkbox" :disabled="disabled" :value="checkValue" v-model="inputValue" ref="checkbox" tabindex="-1")
+    .vu-checkbox__container(:class="containerClasses" ref="checkbox" :tabindex="tabindex"  @keydown.enter="select")
       .vu-checkbox__mark(:class="markClasses")
         Icon check
-    .vu-checkbox__label(v-if="label")
-      | {{ label }}
+    .vu-checkbox__label(v-if="label" v-html="label")
 </template>
 
 <script>
@@ -18,15 +17,11 @@ export default {
   },
 
   methods: {
+    onClick() {
+      this.$emit('click')
+    },
     select() {
-      const value = this.$el.querySelector('input').value
-      if (Array.isArray(this.inputValue)) {
-        if (this.inputValue.includes(value))
-          this.$emit('input', this.inputValue.filter(a => a !== value))
-        else this.$emit('input', this.inputValue.concat([value]))
-      } else {
-        this.$emit('input', !this.inputValue)
-      }
+      this.$refs.checkbox.click()
     },
   },
 
