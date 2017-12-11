@@ -169,7 +169,7 @@ export default {
     },
     onClick() {
       this.$refs.input.focus()
-      this.isFocused = true
+      // this.isFocused = true
     },
     onClear(focus = true) {
       if (this.multiple) {
@@ -191,7 +191,7 @@ export default {
         return
       }
       this.showDropdown = !this.showDropdown
-      this.isFocused = !this.isFocused
+      if (!this.isFocused) this.$refs.tabaway.focus()
       if (this.showDropdown) this.$refs.input.focus()
     },
     onCloseDropdown(value = false) {

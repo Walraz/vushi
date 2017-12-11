@@ -95,9 +95,6 @@ export default {
 </script>
 
 <style lang="stylus">
-html
-  font-size 16px
-
 .flex
   position relative
   display flex
