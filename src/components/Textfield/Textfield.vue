@@ -4,7 +4,7 @@
     :class="textfieldClassed"
 )
   .vu-textfield__wrapper
-    div(v-if="multiple" v-for="(item, $index) in itemList" :key="$index")
+    div(v-if="multiple && itemList.length" v-for="(item, $index) in itemList" :key="$index")
       transition(name="vuFadeBottom" appear)
         .vu-textfield__item
           span {{ item[optionLabel] }}
@@ -51,10 +51,12 @@
       :size="size"
       @select="onItemSelect"
       @close="onCloseDropdown"
+      v-model="value"
     )
   .vu-textfield__tabaway(
     @focus="isFocused = true"
     @blur="isFocused = false"
+    @keydown.enter="$refs.input.focus()"
     ref="tabaway"
     tabindex="-1"
   )
@@ -64,6 +66,7 @@
 import TextfieldIcon from './TextfieldIcon'
 import TextfieldSelect from './TextfieldSelect'
 import Icon from '../Icon'
+import objectEqual from '@/core/utils/objectEqual'
 
 export default {
   name: 'textfield-2',
@@ -86,22 +89,43 @@ export default {
 
   mounted() {
     this.$refs.input.type = this.type
+    this.isValue()
+  },
+
+  watch: {
+    value() {
+      this.isValue()
+    },
+    options() {
+      this.isValue()
+    },
   },
 
   computed: {
     itemList() {
-      if (Array.isArray(this.value) && this.value.length) {
-        return this.value.map(v => {
-          return this.parseOptionArray(this.options).find(
-            o => o[this.optionValue] === v,
-          )
-        })
+      if (
+        Array.isArray(this.value) &&
+        this.value.length &&
+        this.options &&
+        this.options.length
+      ) {
+        return this.value
+          .map(v => {
+            return this.parseOptionArray(this.options).find(o =>
+              objectEqual(o[this.optionValue], v),
+            )
+          })
+          .filter(o => o !== undefined)
       } else return []
     },
     isIcon() {
       if (this.options && !this.icon === 'clear') return 'dropdown'
       if (this.options && this.icon === 'clear') {
-        if (this.multiple && (this.value && this.value.length)) return 'clear'
+        if (
+          this.multiple &&
+          (Array.isArray(this.inputValue) && this.inputValue.length)
+        )
+          return 'clear'
         else if (this.inputLabel.length && !this.multiple) return 'clear'
         else return 'dropdown'
       }
@@ -122,6 +146,7 @@ export default {
       }
     },
     inputStyle() {
+      if (!this.multiple) return
       let fontSize = this.$refs.input
         ? window
             .getComputedStyle(this.$refs.input, null)
@@ -169,21 +194,19 @@ export default {
     },
     onClick() {
       this.$refs.input.focus()
-      // this.isFocused = true
     },
-    onClear(focus = true) {
+    onClear() {
       if (this.multiple) {
         this.inputValue.splice(0, this.inputValue.length)
       } else {
-        this.inputValue = null
+        this.inputValue = ''
       }
       this.inputLabel = ''
       this.searchInput = ''
       this.$refs.input.value = ''
       this.emitValue()
       this.showDropdown = false
-      this.isFocused = false
-      if (focus) this.$refs.input.focus()
+      this.$refs.tabaway.focus()
     },
     toggleDropdown() {
       if (this.isIcon === 'clear') {
@@ -236,18 +259,18 @@ export default {
     onItemSelect(value) {
       if (this.multiple) {
         this.inputLabel = ''
+        this.searchInput = ''
         this.inputValue = value
       } else {
         this.inputLabel = value[this.optionLabel]
         this.inputValue = value[this.optionValue]
         this.$refs.input.value = value[this.optionLabel]
       }
-      this.searchInput = ''
+
       this.emitValue()
     },
     parseOptionArray(value) {
       if (!value.length) return []
-
       if (typeof value[0] === 'object') {
         return value.map(option => {
           return {
@@ -262,6 +285,15 @@ export default {
             [this.optionValue]: option,
           }
         })
+      }
+    },
+    isValue() {
+      if (this.options && this.options.length) {
+        if (this.multiple) return this.onItemSelect(this.value)
+        const result = this.parseOptionArray(this.options).find(o =>
+          objectEqual(o[this.optionValue], this.value),
+        )
+        if (result) this.onItemSelect(result)
       }
     },
   },
@@ -330,6 +362,7 @@ export default {
   &__wrapper
     display flex
     flex-wrap wrap
+    width 100%
 
   &__item
     border-radius 2px

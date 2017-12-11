@@ -38,6 +38,12 @@ export default {
     options(value) {
       this.parseOptionArray(value)
     },
+    value() {
+      if (this.multiple)
+        this.multipleValues = Array.isArray(this.$parent.value)
+          ? this.$parent.value
+          : []
+    },
   },
 
   computed: {
@@ -60,7 +66,10 @@ export default {
 
   mounted() {
     this.parseOptionArray(this.options)
-    if (this.multiple) this.multipleValues = this.$parent.value || []
+    if (this.multiple)
+      this.multipleValues = Array.isArray(this.$parent.value)
+        ? this.$parent.value
+        : []
     document.addEventListener('click', this.closeDropdown, true)
     document.addEventListener('keydown', this.onKeydown, false)
     const itemEl = this.$el.querySelector('.vu-textfield-select__item')
@@ -86,6 +95,7 @@ export default {
       if (this.multiple) return
       this.isResult = value
       this.$emit('select', value)
+      this.$parent.$refs.tabaway.focus()
       this.closeDropdown()
     },
     onKeydown(e) {
@@ -115,7 +125,6 @@ export default {
         }
 
         if (!this.multiple) {
-          this.$parent.$refs.tabaway.focus()
           const result = this.optionList.find(
             (o, i) => i === this.selectedIndex,
           )
@@ -171,6 +180,7 @@ export default {
   },
 
   props: {
+    value: null,
     selectTab: Boolean,
     autosuggestion: Boolean,
     multiple: Boolean,

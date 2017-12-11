@@ -1,8 +1,8 @@
 <template lang="pug">
   .flex
     div(style="width: 100%")
-    Textfield(icon="clear" selectTab :options="optionsArray" v-model="selected" multiple autosuggestion)
-    Textfield(icon="clear" selectTab :options="optionsArray" v-model="selected2" autosuggestion)
+    Textfield(icon="clear" selectTab :options="options" v-model="selected" multiple autosuggestion)
+    Textfield(icon="clear" selectTab :options="options" v-model="selected2" autosuggestion)
     Textfield(icon="clear" v-model="text")
     //- MyButton(fullWidth) Spara händelse
     //- MyButton(disabled) Spara händelse
@@ -29,7 +29,7 @@
 
 
 <script>
-import Textfield from '@/components/Textfield'
+import Textfield from '../src/components/Textfield'
 import MyButton from './MyButton'
 import Spinner from '../src/components/Spinner'
 import Icon from '../src/components/Icon'
@@ -50,7 +50,7 @@ export default {
     return {
       CheckBool: true,
       check: null,
-      selected: null,
+      selected: [true],
       selected2: null,
       validated: false,
       text: '',
@@ -62,19 +62,22 @@ export default {
         name: '',
       },
       optionsArray: ['item 1', 'item 2', 'lol', 'hund', 'katt', 'cool item'],
-      options: [],
+      options: [{ label: 'Nej', value: false }, { label: 'Ja', value: true }],
+      // options: [],
     }
   },
 
   mounted() {
+    // this.selected = []
     setTimeout(() => {
-      this.selected = []
+      this.selected = [null]
+      this.selected2 = null
       this.options = [
-        { id: 1, label: 'Ja', value: { car: false } },
-        { id: 2, label: 'Nej', value: null },
-        { id: 3, label: 'Vet ej', value: false },
+        { id: 1, label: 'Car', value: { car: true } },
+        { id: 2, label: 'Nej', value: false },
+        { id: 3, label: 'Vet ej', value: null },
       ]
-    }, 1000)
+    }, 2000)
   },
 
   methods: {

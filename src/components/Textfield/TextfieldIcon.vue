@@ -1,10 +1,10 @@
 <template lang="pug">
   .vu-textfield-icon
     transition(:name="transition" mode="out-in")
-      Icon(@click.stop.default="$_iconFn" v-if="icon !== 'clear' && $_iconShow" :key="$_iconShow") {{ $_iconName }}
-      Icon(@click.stop.default="$_iconFn" v-if="icon === 'clear' && icon !== 'dropdown' && $_iconShow") clear
-      Icon(@click.stop.default="$_iconFn" v-else-if="icon === 'dropdown' && !$_iconShow") keyboard_arrow_up
-      Icon(@click.stop.default="$_iconFn" v-else-if="icon === 'visibility' && !$_iconShow") visibility_off
+      Icon(@click.stop.default="$_iconFn" class="vu-textfield-icon--pointer" v-if="icon !== 'clear' && $_iconShow" :key="$_iconShow") {{ $_iconName }}
+      Icon(@click.stop.default="$_iconFn" class="vu-textfield-icon--pointer" v-if="icon === 'clear' && icon !== 'dropdown' && $_iconShow") clear
+      Icon(@click.stop.default="$_iconFn" class="vu-textfield-icon--pointer" v-else-if="icon === 'dropdown' && !$_iconShow") keyboard_arrow_up
+      Icon(@click.stop.default="$_iconFn" class="vu-textfield-icon--pointer" v-else-if="icon === 'visibility' && !$_iconShow") visibility_off
 </template>
 
 <script>
@@ -49,7 +49,10 @@ export default {
     },
     clearShow() {
       if (this.$parent.multiple) {
-        return this.$parent.value && this.$parent.value.length
+        return (
+          Array.isArray(this.$parent.inputValue) &&
+          this.$parent.inputValue.length
+        )
       }
       if (this.$parent.options) return this.$parent.inputLabel.length
       return this.$parent.searchInput.length
@@ -99,10 +102,12 @@ export default {
 <style lang="stylus">
 .vu-textfield-icon
   font-size 1em
-  cursor pointer
   padding 8px
   display flex
   align-items center
   justify-content center
+
+  &--pointer
+    cursor pointer
 </style>
 

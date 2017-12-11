@@ -9,6 +9,7 @@
 
 <script>
 import Icon from './Icon'
+import objectEqual from '@/core/utils/objectEqual'
 export default {
   name: 'checkbox',
 
@@ -28,7 +29,7 @@ export default {
   computed: {
     isMarked() {
       return Array.isArray(this.inputValue)
-        ? this.inputValue.includes(this.checkValue)
+        ? this.inputValue.some(o => objectEqual(o, this.checkValue))
         : this.inputValue === true
     },
     inputValue: {
