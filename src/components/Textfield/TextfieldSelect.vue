@@ -70,6 +70,8 @@ export default {
       this.multipleValues = Array.isArray(this.$parent.value)
         ? this.$parent.value
         : []
+
+    document.addEventListener('touchstart', this.closeDropdown, true)
     document.addEventListener('click', this.closeDropdown, true)
     document.addEventListener('keydown', this.onKeydown, false)
     const itemEl = this.$el.querySelector('.vu-textfield-select__item')
@@ -175,6 +177,7 @@ export default {
   },
 
   beforeDestroy() {
+    document.removeEventListener('touchstart', this.onKeydown, false)
     document.removeEventListener('keydown', this.onKeydown, false)
     document.removeEventListener('click', this.closeDropdown, true)
   },

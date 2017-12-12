@@ -83,10 +83,15 @@ export default {
     cursor default
     pointer-events none
 
+    .vu-checkbox__label
+      color $disabled-color
+      user-select none
+
   &__input
     display none
 
   &__label
+    font-size 14px
     padding-left 16px
 
   &__container
@@ -113,7 +118,7 @@ export default {
         border-color darken($primary-color, 10)
 
     &--disabled
-      border-color $disabled-bg
+      border-color $disabled-color
 
   &__mark
     background $primary-color

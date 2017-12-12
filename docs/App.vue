@@ -1,10 +1,10 @@
 <template lang="pug">
   .flex
     div(style="width: 100%")
-    Textfield(label="Label" placeholder="Välj ett alternativ"  required icon="clear" selectTab :options="options" v-model="selected" multiple autosuggestion)
+    Textfield(label="Label" placeholder="Välj ett alternativ"  icon="clear" selectTab :options="options" v-model="selected" multiple autosuggestion)
     Textfield(label="Husdjur" placeholder="Välj ett alternativ"  required icon="clear" selectTab :options="optionsArray" v-model="selected2" autosuggestion)
-    Textfield(icon="clear" autosuggestion :options="optionsArray" v-model="selected2" label="Husdjur")
-    Textfield(label="Label" type="email" placeholder="Write..." required icon="clear" v-model="text")
+    Textfield(mobileFullscreen icon="clear" autosuggestion :options="optionsArray" v-model="selected2" label="Husdjur")
+    Textfield(mobileFullscreen label="Label" type="email" :validate="validationEmail" placeholder="Write..." required icon="clear" v-model="text")
     //- MyButton(fullWidth) Spara händelse
     //- MyButton(disabled) Spara händelse
     //- MyButton(@click="toggleLoading") Spara händelse
@@ -49,9 +49,18 @@ export default {
 
   data() {
     return {
+      validationEmail: {
+        email: {
+          message: 'Noo...',
+        },
+        includesChar: {
+          param: 'e',
+          message: 'Not right char',
+        },
+      },
       CheckBool: true,
       check: null,
-      selected: [true],
+      selected: [false],
       selected2: 'item 2',
       validated: false,
       text: '',
@@ -63,15 +72,15 @@ export default {
         name: '',
       },
       optionsArray: ['item 1', 'item 2', 'lol', 'hund', 'katt', 'cool item'],
-      options: [{ label: 'Nej', value: false }, { label: 'Ja', value: true }],
-      // options: [],
+      // options: [{ label: 'Nej', value: false }, { label: 'Ja', value: true }],
+      options: [],
     }
   },
 
   mounted() {
     // this.selected = []
     setTimeout(() => {
-      this.selected = [null, { car: true }, false]
+      this.selected = [false]
       // this.selected2 = null
       this.options = [
         { id: 1, label: 'Car', value: { car: true } },

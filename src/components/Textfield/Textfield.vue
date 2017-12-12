@@ -1,5 +1,5 @@
 <template lang="pug">
-.vu-textfield-container(:class="{ 'vu-textfield-container--disabled' : disabled }")
+.vu-textfield-container(:class="{ 'vu-textfield-container--disabled' : disabled, 'vu-textfield-container--fullscreen' : isMobileFullscreen }")
   .vu-textfield-container__label-container
     label.vu-textfield__label(:class="labelClasses" v-if="label")
           | {{ label }}
@@ -33,15 +33,18 @@
         :required="required"
         :value="searchInput"
       )
-    TextfieldIcon(
-      v-if="isIcon"
-      :icon="isIcon"
-      :iconFn="iconFn"
-      :iconShow="iconShow"
-      :iconName="iconName"
-      :iconTransition="iconTransition"
-      @clear="onClear"
-      @dropdown="toggleDropdown"
+    transition(name="vuScale" mode="out-in")
+      .vu-textfield__spinner(v-if="options && !options.length")
+        Spinner
+      TextfieldIcon(
+        v-else-if="isIcon"
+        :icon="isIcon"
+        :iconFn="iconFn"
+        :iconShow="iconShow"
+        :iconName="iconName"
+        :iconTransition="iconTransition"
+        @clear="onClear"
+        @dropdown="toggleDropdown"
     )
     transition(name="vuFadeBottom")
       TextfieldSelect(
@@ -72,11 +75,12 @@
 </template>
 
 <script>
+import Spinner from '@/components/Spinner'
 import TextfieldIcon from './TextfieldIcon'
 import TextfieldSelect from './TextfieldSelect'
 import Icon from '../Icon'
 import objectEqual from '@/core/utils/objectEqual'
-import validate from '../../core/mixins/validate'
+import validate from '@/core/mixins/validate'
 
 export default {
   name: 'textfield',
@@ -87,11 +91,13 @@ export default {
     TextfieldIcon,
     TextfieldSelect,
     Icon,
+    Spinner,
   },
 
   data() {
     return {
       isFocused: false,
+      inputIsFocused: false,
       inputValue: '',
       inputLabel: '',
       searchInput: '',
@@ -115,6 +121,9 @@ export default {
   },
 
   computed: {
+    isMobileFullscreen() {
+      return this.mobileFullscreen && this.isFocused && this.inputIsFocused
+    },
     itemList() {
       if (
         Array.isArray(this.value) &&
@@ -165,7 +174,7 @@ export default {
       }
     },
     floatLabel() {
-      if (this.isFocused) return true
+      if (this.inputIsFocused) return true
       if (this.setPlaceholder.length) return true
       if (this.options)
         return this.multiple
@@ -207,6 +216,7 @@ export default {
   methods: {
     onFocus(e) {
       if (this.disabled) return
+      this.inputIsFocused = true
       this.isFocused = true
       if (this.options) this.showDropdown = true
       if (this.options && !this.multiple) {
@@ -218,6 +228,7 @@ export default {
     },
     onBlur(e) {
       this.isFocused = false
+      this.inputIsFocused = false
     },
     onInput({ target }) {
       if (this.type === 'number') {
@@ -307,6 +318,7 @@ export default {
         this.searchInput = ''
         this.inputValue = value
       } else {
+        this.searchInput = value[this.optionLabel]
         this.inputLabel = value[this.optionLabel]
         this.inputValue = value[this.optionValue]
         this.$refs.input.value = value[this.optionLabel]
@@ -345,6 +357,7 @@ export default {
   },
 
   props: {
+    mobileFullscreen: Boolean,
     label: String,
     selectTab: Boolean,
     autosuggestion: Boolean,
@@ -391,6 +404,36 @@ export default {
   flex 1 0 auto
   width 100%
   flex-direction column
+  transition --transition()
+
+  &::before
+    pointer-events none
+    opacity 0
+    content ''
+    display block
+    position fixed
+    background rgba(#fff)
+    top 0
+    left 0
+    width 100vw
+    height 100vh
+    z-index -1
+
+  &--fullscreen
+    position fixed
+    top 0
+    left 0
+    z-index 99999
+    box-shadow 0 8px 16px rgba(#000, 0.5)
+    background #fff
+
+    .vu-textfield-container__label-container, .vu-textfield, .vu-wrapper, .vu-textfield-container__error
+      z-index 99999
+      background #fff
+      position relative
+
+    &::before
+      opacity 1
 
   &--disabled
     pointer-events none
@@ -425,6 +468,14 @@ export default {
   padding-bottom 1px
   cursor text
   transition --transition(border-bottom), --transition(box-shadow)
+
+  &__spinner
+    font-size 1em
+    padding 8px
+    display flex
+    align-items center
+    justify-content center
+    color rgba(#000, 0.6)
 
   &__label
     font-size 16px

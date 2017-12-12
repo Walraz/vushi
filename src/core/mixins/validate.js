@@ -4,19 +4,34 @@ export default {
       return this.$_validate.error && this.$_validateOn
     },
     $_validate() {
-      if (this.type === 'email') this.validate.email = true
-      if (this.pattern) this.validate.pattern = this.pattern
-      if (this.required) this.validate.required = true
+      if (this.type === 'email' && !this.validate.email)
+        this.validate.email = true
+      if (this.pattern && !this.validate.pattern)
+        this.validate.pattern = this.pattern
+      if (this.required && !this.validate.required)
+        this.validate.required = true
       const validated = Object.keys(this.validate).map(rule => {
+        const errorRule = this.validate[rule]
+        let message = false
+        let param = false
+        if (typeof errorRule === 'object') {
+          if (errorRule.message) message = errorRule.message
+          param = errorRule.param || true
+        } else {
+          param = errorRule
+        }
         const r = this[`$_${rule}`](
-          this.validate[rule],
+          param,
           this.$_validateConvert(
             !this.options
               ? this.value
               : this.multiple ? this.inputValue.length : this.inputLabel,
           ),
         )
-        return { error: r.error, message: r.message }
+        return {
+          error: r.error,
+          message: message || this.errorMessage || r.message,
+        }
       })
 
       return validated.find(r => r.error) || { error: false, message: '' }
@@ -37,32 +52,32 @@ export default {
     $_minLength(min, value) {
       return {
         error: value.length < min,
-        message: this.errorMessage || `Måste minst innehålla ${min} tecken`,
+        message: `Måste minst innehålla ${min} tecken`,
       }
     },
     $_maxLength(max, value) {
       return {
         error: value.length > max,
-        message: this.errorMessage || `Får max innehålla ${max} tecken`,
+        message: `Får max innehålla ${max} tecken`,
       }
     },
     $_required(type, value) {
       return {
         error: !value.length,
-        message: this.errorMessage || 'Detta fältet måste fyllas i',
+        message: 'Detta fältet måste fyllas i',
       }
     },
     $_includesChar(char, value) {
       return {
-        error: !value.includes(char),
-        message: this.errorMessage || 'Måste innehålla "."',
+        error: !value.toLowerCase().includes(char.toLowerCase()),
+        message: 'Måste innehålla "."',
       }
     },
     $_pattern(regex, value) {
       const pattern = new RegExp(regex)
       return {
         error: !pattern.test(value),
-        message: this.errorMessage || `Måste följa regulärt uttryck: ${regex}`,
+        message: `Måste följa regulärt uttryck: ${regex}`,
       }
     },
     $_email(type, value) {
@@ -71,7 +86,7 @@ export default {
       )
       return {
         error: !pattern.test(value),
-        message: this.errorMessage || `Felaktig email address`,
+        message: `Felaktig email address`,
       }
     },
   },
