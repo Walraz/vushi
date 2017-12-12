@@ -207,7 +207,7 @@ export default {
   top calc(100% + 2px)
   left 0
   list-style-type none
-  box-shadow 0 4px 12px rgba(#000, 0.2)
+  box-shadow 0 8px 16px rgba(#000, 0.1)
   min-width 100%
   z-index 99
   background #fff
@@ -237,15 +237,16 @@ export default {
     height 52px
     cursor pointer
     white-space nowrap
+    transition --transition(background)
 
     &--focused
-      border 1px solid rgba($primary-color, 0.4)
+      background rgba($primary-color, 0.08)
 
     &--selected
       font-weight 700
       color $primary-color
 
     &:hover
-      background rgba(#000, 0.05)
+      background rgba($primary-color, 0.12)
 </style>
 

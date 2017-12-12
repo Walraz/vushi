@@ -1,5 +1,5 @@
 <template lang="pug">
-  .vu-textfield-icon
+  .vu-textfield-icon(v-if="!$parent.disabled")
     transition(:name="transition" mode="out-in")
       Icon(@click.stop.default="$_iconFn" class="vu-textfield-icon--pointer" v-if="icon !== 'clear' && $_iconShow" :key="$_iconShow") {{ $_iconName }}
       Icon(@click.stop.default="$_iconFn" class="vu-textfield-icon--pointer" v-if="icon === 'clear' && icon !== 'dropdown' && $_iconShow") clear
@@ -106,6 +106,7 @@ export default {
   display flex
   align-items center
   justify-content center
+  color rgba(#000, 0.6)
 
   &--pointer
     cursor pointer

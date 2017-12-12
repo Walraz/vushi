@@ -1,65 +1,74 @@
 <template lang="pug">
-.vu-textfield(
-    @click="onClick"
-    :class="textfieldClassed"
-)
-  .vu-textfield__wrapper
-    div(v-if="multiple && itemList.length" v-for="(item, $index) in itemList" :key="$index")
-      transition(name="vuFadeBottom" appear)
-        .vu-textfield__item
-          span {{ item[optionLabel] }}
-          Icon(@click="onItemRemove($index)") close
-    input.vu-textfield__input(
-      ref="input"
-      tabindex="0"
-      @input="onInput"
-      @focus="onFocus"
-      @blur="onBlur"
-      @keydown.delete="removeLastItem"
-      @keydown.esc="$refs.input.blur"
-      :style="inputStyle"
-      :placeholder="setPlaceholder"
-      :disabled="disabled"
-      :max="max"
-      :min="min"
-      :maxlength="maxlength"
-      :pattern="pattern"
-      :readonly="isReadonly"
-      :required="required"
-      :value="searchInput"
-    )
-  TextfieldIcon(
-    v-if="isIcon"
-    :icon="isIcon"
-    :iconFn="iconFn"
-    :iconShow="iconShow"
-    :iconName="iconName"
-    :iconTransition="iconTransition"
-    @clear="onClear"
-    @dropdown="toggleDropdown"
+.vu-textfield-container(:class="{ 'vu-textfield-container--disabled' : disabled }")
+  .vu-textfield-container__label-container
+    label.vu-textfield__label(:class="labelClasses" v-if="label")
+          | {{ label }}
+          span.vu-textfield__label--required(v-if="required") *
+  .vu-textfield(
+      @click="onClick"
+      :class="textfieldClassed"
   )
+    .vu-textfield__wrapper
+      div(v-if="multiple && itemList.length" v-for="(item, $index) in itemList" :key="$index")
+        transition(name="vuFadeBottom" appear)
+          .vu-textfield__item(:class="{ 'vu-textfield__item--disabled' : disabled }")
+            span {{ item[optionLabel] }}
+            Icon(@click="onItemRemove($index)" v-if="!disabled") close
+      input.vu-textfield__input(
+        ref="input"
+        tabindex="0"
+        @input="onInput"
+        @focus="onFocus"
+        @blur="onBlur"
+        @keydown.delete="removeLastItem"
+        @keydown.esc="$refs.input.blur"
+        :style="inputStyle"
+        :placeholder="setPlaceholder"
+        :disabled="disabled"
+        :max="max"
+        :min="min"
+        :maxlength="maxlength"
+        :pattern="pattern"
+        :readonly="isReadonly"
+        :required="required"
+        :value="searchInput"
+      )
+    TextfieldIcon(
+      v-if="isIcon"
+      :icon="isIcon"
+      :iconFn="iconFn"
+      :iconShow="iconShow"
+      :iconName="iconName"
+      :iconTransition="iconTransition"
+      @clear="onClear"
+      @dropdown="toggleDropdown"
+    )
+    transition(name="vuFadeBottom")
+      TextfieldSelect(
+        v-if="options && showDropdown"
+        ref="select"
+        :options="options"
+        :multiple="multiple"
+        :autosuggestion="autosuggestion"
+        :optionLabel="optionLabel"
+        :optionValue="optionValue"
+        :selectTab="selectTab"
+        :size="size"
+        @select="onItemSelect"
+        @close="onCloseDropdown"
+        v-model="value"
+      )
+    .vu-textfield__tabaway(
+      @focus="isFocused = true"
+      @blur="isFocused = false"
+      @keydown.enter="$refs.input.focus()"
+      ref="tabaway"
+      tabindex="-1"
+    )
   transition(name="vuFadeBottom")
-    TextfieldSelect(
-      v-if="options && showDropdown"
-      ref="select"
-      :options="options"
-      :multiple="multiple"
-      :autosuggestion="autosuggestion"
-      :optionLabel="optionLabel"
-      :optionValue="optionValue"
-      :selectTab="selectTab"
-      :size="size"
-      @select="onItemSelect"
-      @close="onCloseDropdown"
-      v-model="value"
-    )
-  .vu-textfield__tabaway(
-    @focus="isFocused = true"
-    @blur="isFocused = false"
-    @keydown.enter="$refs.input.focus()"
-    ref="tabaway"
-    tabindex="-1"
-  )
+    .vu-textfield-container__error(v-if="isError")
+      Icon.vu-textfield-container__error--icon info_outline
+      | {{ $_validate.message }}
 </template>
 
 <script>
@@ -67,9 +76,12 @@ import TextfieldIcon from './TextfieldIcon'
 import TextfieldSelect from './TextfieldSelect'
 import Icon from '../Icon'
 import objectEqual from '@/core/utils/objectEqual'
+import validate from '../../core/mixins/validate'
 
 export default {
-  name: 'textfield-2',
+  name: 'textfield',
+
+  mixins: [validate],
 
   components: {
     TextfieldIcon,
@@ -84,6 +96,7 @@ export default {
       inputLabel: '',
       searchInput: '',
       showDropdown: false,
+      isDirty: false,
     }
   },
 
@@ -134,19 +147,38 @@ export default {
     },
     setPlaceholder() {
       if (this.placeholder && !this.options) return this.placeholder
-      if (this.options && !this.multiple) return this.inputLabel
+      if (this.options && !this.multiple)
+        return this.inputLabel || this.placeholder
+      if (this.options && this.multiple && !this.inputValue.length)
+        return this.placeholder
       else return ''
     },
     isReadonly() {
       return this.readonly || (this.options && !this.autosuggestion)
     },
+    labelClasses() {
+      return {
+        'vu-textfield__label--active': this.isFocused,
+        'vu-textfield__label--error': this.isError,
+        'vu-textfield__label--float': this.floatLabel,
+        'vu-textfield__label--disabled': this.disabled,
+      }
+    },
+    floatLabel() {
+      if (this.isFocused) return true
+      if (this.setPlaceholder.length) return true
+      if (this.options)
+        return this.multiple ? this.inputValue.length : this.inputLabel.length
+      if (!this.options) return this.value.length
+    },
     textfieldClassed() {
       return {
         'vu-textfield--focused': this.isFocused,
+        'vu-textfield--error': this.isError,
+        'vu-textfield--disabled': this.disabled,
       }
     },
     inputStyle() {
-      if (!this.multiple) return
       let fontSize = this.$refs.input
         ? window
             .getComputedStyle(this.$refs.input, null)
@@ -172,6 +204,7 @@ export default {
 
   methods: {
     onFocus(e) {
+      if (this.disabled) return
       this.isFocused = true
       if (this.options) this.showDropdown = true
       if (this.options && !this.multiple) {
@@ -185,6 +218,12 @@ export default {
       this.isFocused = false
     },
     onInput({ target }) {
+      if (this.type === 'number') {
+        if (this.min && parseInt(target.value, 10) < this.min)
+          return (this.$refs.input.value = this.searchInput)
+        if (this.max && parseInt(target.value, 10) > this.max)
+          return (this.$refs.input.value = this.searchInput)
+      }
       if (this.maxlength && target.value > this.maxlength) return
       this.searchInput = target.value
       if (!this.options) {
@@ -193,9 +232,11 @@ export default {
       }
     },
     onClick() {
+      if (this.disabled) return
       this.$refs.input.focus()
     },
     onClear() {
+      if (this.disabled) return
       if (this.multiple) {
         this.inputValue.splice(0, this.inputValue.length)
       } else {
@@ -209,6 +250,7 @@ export default {
       this.$refs.tabaway.focus()
     },
     toggleDropdown() {
+      if (this.disabled) return
       if (this.isIcon === 'clear') {
         this.onClear()
         return
@@ -244,6 +286,7 @@ export default {
       this.showDropdown = false
     },
     emitValue() {
+      this.isDirty = true
       this.$emit('input', this.inputValue)
     },
     removeLastItem() {
@@ -289,7 +332,8 @@ export default {
     },
     isValue() {
       if (this.options && this.options.length) {
-        if (this.multiple) return this.onItemSelect(this.value)
+        if (this.multiple && this.value.length)
+          return this.onItemSelect(this.value)
         const result = this.parseOptionArray(this.options).find(o =>
           objectEqual(o[this.optionValue], this.value),
         )
@@ -299,6 +343,7 @@ export default {
   },
 
   props: {
+    label: String,
     selectTab: Boolean,
     autosuggestion: Boolean,
     multiple: Boolean,
@@ -339,14 +384,74 @@ export default {
 </script>
 
 <style lang="stylus">
+.vu-textfield-container
+  display flex
+  flex 1 0 auto
+  width 100%
+  flex-direction column
+
+  &--disabled
+    pointer-events none
+
+  &__label-container
+    height 24px
+    position relative
+    z-index 1
+
+  &__error
+    font-size 12px
+    padding 4px 8px
+    font-weight 400
+    display inline-flex
+    align-items center
+    color $warning-color
+
+    &--icon
+      padding-right 4px
+
 .vu-textfield
   position relative
   display flex
   flex 1 0 auto
   width 100%
   justify-content space-between
-  border-bottom 1px solid rgba(#000, 0.2)
+  border 0
+  border-radius 0
+  border-style solid
+  border-bottom-width 1px
+  border-color rgba(#000, 0.2)
+  padding-bottom 1px
   cursor text
+  transition --transition(border-bottom), --transition(box-shadow)
+
+  &__label
+    font-size 16px
+    position absolute
+    top 36px
+    left 8px
+    color #555
+    transform-origin left top
+    transition --transition()
+    pointer-events none
+
+    &--active
+      color $primary-color
+
+    &--float
+      font-weight 700
+      transform translateY(-24px) scale(0.74)
+
+    &--error
+      color $warning-color
+
+    &--required
+      color $warning-color
+
+    &--disabled
+      color $disabled-color
+
+      .vu-textfield__label--required
+        color $disabled-color
 
   &__tabaway
     position absolute
@@ -356,8 +461,16 @@ export default {
     pointer-events none
 
   &--focused
-    border-width 2px
+    box-shadow inset 0 -1px 0 0 $primary-color
     border-color $primary-color
+
+  &--error
+    box-shadow inset 0 -1px 0 0 $warning-color
+    border-color $warning-color
+
+  &--disabled
+    border-color $disabled-bg
+    border-style dashed
 
   &__wrapper
     display flex
@@ -380,11 +493,16 @@ export default {
     white-space nowrap
     cursor pointer
 
+    &--disabled
+      background $disabled-bg
+      color $disabled-color
+
     span
       padding 0 4px
       cursor default
 
   &__input
+    caret-color $primary-color
     font-size 16px
     height 40px
     margin-left 8px
@@ -392,5 +510,9 @@ export default {
     border-radius 0
     display inline-flex
     flex 1 0 auto
+    font-family inherit
+
+    &:disabled
+      color $disabled-color
 </style>
 
