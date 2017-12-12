@@ -148,9 +148,9 @@ export default {
     setPlaceholder() {
       if (this.placeholder && !this.options) return this.placeholder
       if (this.options && !this.multiple)
-        return this.inputLabel || this.placeholder
+        return this.inputLabel || this.placeholder || ''
       if (this.options && this.multiple && !this.inputValue.length)
-        return this.placeholder
+        return this.placeholder || ''
       else return ''
     },
     isReadonly() {
@@ -168,8 +168,10 @@ export default {
       if (this.isFocused) return true
       if (this.setPlaceholder.length) return true
       if (this.options)
-        return this.multiple ? this.inputValue.length : this.inputLabel.length
-      if (!this.options) return this.value.length
+        return this.multiple
+          ? Boolean(this.inputValue.length)
+          : Boolean(this.inputLabel.length)
+      if (!this.options) return Boolean(this.value.length)
     },
     textfieldClassed() {
       return {
