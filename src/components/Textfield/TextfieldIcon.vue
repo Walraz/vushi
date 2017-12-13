@@ -1,10 +1,11 @@
 <template lang="pug">
   .vu-textfield-icon(v-if="!$parent.disabled")
-    transition(:name="transition" mode="out-in")
-      Icon(@click.stop.default="$_iconFn" class="vu-textfield-icon--pointer" v-if="icon !== 'clear' && $_iconShow" :key="$_iconShow") {{ $_iconName }}
-      Icon(@click.stop.default="$_iconFn" class="vu-textfield-icon--pointer" v-if="icon === 'clear' && icon !== 'dropdown' && $_iconShow") clear
-      Icon(@click.stop.default="$_iconFn" class="vu-textfield-icon--pointer" v-else-if="icon === 'dropdown' && !$_iconShow") keyboard_arrow_up
-      Icon(@click.stop.default="$_iconFn" class="vu-textfield-icon--pointer" v-else-if="icon === 'visibility' && !$_iconShow") visibility_off
+    transition(name="vuDropdown" mode="out-in")
+      Icon(@click="visibilityFn" class="vu-textfield-icon--pointer" v-if="icon === 'visibility' && visibilityShow" :key="visibilityShow") visibility
+      Icon(@click="visibilityFn" class="vu-textfield-icon--pointer" v-else-if="icon === 'visibility' && !visibilityShow") visibility_off
+      Icon(@click="clearFn" v-else-if="clearShow" :key="clearShow" class="vu-textfield-icon--pointer") clear
+      Icon(@click="dropdownFn" v-else-if="!clearShow && $parent.options && !$parent.inputIsFocused" :key="$parent.inputIsFocused" class="vu-textfield-icon--pointer") keyboard_arrow_down
+      Icon(@click="dropdownFn" v-else-if="!clearShow && $parent.options && $parent.inputIsFocused" class="vu-textfield-icon--pointer") keyboard_arrow_up
 </template>
 
 <script>
@@ -19,26 +20,7 @@ export default {
 
   data() {
     return {
-      $_iconName: '',
       isPasswordType: true,
-    }
-  },
-
-  created() {
-    this.$_iconName = this.iconName || this.icon
-    switch (this.icon) {
-      case 'dropdown':
-        this.$_iconFn = this.iconFn || this.dropdownFn
-        this.$_iconName = this.iconName || 'keyboard_arrow_down'
-        break
-      case 'clear':
-        this.$_iconFn = this.iconFn || this.clearFn
-        break
-      case 'visibility':
-        this.$_iconFn = this.iconFn || this.visibilityFn
-        break
-      default:
-        this.$_iconFn = this.iconFn || this._iconFn
     }
   },
 
@@ -48,31 +30,17 @@ export default {
       return this.iconTransition
     },
     clearShow() {
-      if (this.$parent.multiple) {
-        return (
-          Array.isArray(this.$parent.inputValue) &&
-          this.$parent.inputValue.length
-        )
-      }
-      if (this.$parent.options) return this.$parent.inputLabel.length
-      return this.$parent.searchInput.length
+      return this.icon === 'clear' && this.$parent.searchInput.length > 0
     },
     visibilityShow() {
       return this.isPasswordType
     },
     dropdownShow() {
-      return !this.$parent.$data.showDropdown
-    },
-    $_iconShow() {
-      if (this.icon === 'clear') return this.clearShow
-      if (this.icon === 'visibility') return this.visibilityShow
-      if (this.icon === 'dropdown') return this.dropdownShow
-      else return this.iconShow
+      return this.$parent.inputIsFocused
     },
   },
 
   methods: {
-    _iconFn() {},
     dropdownFn() {
       this.$emit('dropdown')
     },
@@ -83,18 +51,12 @@ export default {
       const inputType = this.$parent.$refs.input.type
       this.isPasswordType = inputType === 'text'
       this.$parent.$refs.input.type = !this.isPasswordType ? 'text' : 'password'
+      this.$parent.$refs.input.focus()
     },
   },
 
   props: {
     icon: String,
-    iconName: String,
-    iconShow: Boolean,
-    iconTransition: {
-      type: String,
-      default: () => 'vuScale',
-    },
-    iconFn: Function,
   },
 }
 </script>
@@ -110,5 +72,11 @@ export default {
 
   &--pointer
     cursor pointer
+
+.vu-textfield-icon-dropdown
+  transition --transition()
+
+  &--up
+    transform rotate(180deg)
 </style>
 

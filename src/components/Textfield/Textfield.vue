@@ -1,11 +1,10 @@
 <template lang="pug">
-.vu-textfield-container(:class="{ 'vu-textfield-container--disabled' : disabled, 'vu-textfield-container--fullscreen' : isMobileFullscreen }")
+.vu-textfield-container(@click.stop :class="{ 'vu-textfield-container--disabled' : disabled, 'vu-textfield-container--fullscreen' : isMobileFullscreen }")
   .vu-textfield-container__label-container
     label.vu-textfield__label(:class="labelClasses" v-if="label")
           | {{ label }}
           span.vu-textfield__label--required(v-if="required") *
   .vu-textfield(
-      @click="onClick"
       :class="textfieldClassed"
   )
     .vu-textfield__wrapper
@@ -13,7 +12,7 @@
         transition(name="vuFadeBottom" appear)
           .vu-textfield__item(:class="{ 'vu-textfield__item--disabled' : disabled }")
             span {{ item[optionLabel] }}
-            Icon(@click="onItemRemove($index)" v-if="!disabled") close
+            Icon(@click.prevent.stop="onItemRemove($index)" v-if="!disabled") close
       input.vu-textfield__input(
         ref="input"
         tabindex="0"
@@ -22,6 +21,7 @@
         @blur="onBlur"
         @keydown.delete="removeLastItem"
         @keydown.esc="$refs.input.blur"
+        @keydown.enter="$refs.tabaway.focus()"
         :style="inputStyle"
         :placeholder="setPlaceholder"
         :disabled="disabled"
@@ -37,18 +37,14 @@
       .vu-textfield__spinner(v-if="options && !options.length")
         Spinner
       TextfieldIcon(
-        v-else-if="isIcon"
-        :icon="isIcon"
-        :iconFn="iconFn"
-        :iconShow="iconShow"
-        :iconName="iconName"
-        :iconTransition="iconTransition"
+        v-if="showIcon"
+        :icon="icon"
         @clear="onClear"
-        @dropdown="toggleDropdown"
-    )
+        @dropdown="onDropdown"
+      )
     transition(name="vuFadeBottom")
       TextfieldSelect(
-        v-if="options && showDropdown"
+        v-if="options && inputIsFocused"
         ref="select"
         :options="options"
         :multiple="multiple"
@@ -101,7 +97,6 @@ export default {
       inputValue: '',
       inputLabel: '',
       searchInput: '',
-      showDropdown: false,
       isDirty: false,
     }
   },
@@ -109,6 +104,13 @@ export default {
   mounted() {
     this.$refs.input.type = this.type
     this.isValue()
+    if (this.autofocus) this.$refs.input.focus()
+  },
+
+  beforeDestroy() {
+    if (this.mobileFullscreen && !this.options) {
+      document.removeEventListener('click', this.mobileFullscreenClose, true)
+    }
   },
 
   watch: {
@@ -122,7 +124,12 @@ export default {
 
   computed: {
     isMobileFullscreen() {
-      return this.mobileFullscreen && this.isFocused && this.inputIsFocused
+      return (
+        this.isMobile() &&
+        this.mobileFullscreen &&
+        this.isFocused &&
+        this.inputIsFocused
+      )
     },
     itemList() {
       if (
@@ -139,20 +146,6 @@ export default {
           })
           .filter(o => o !== undefined)
       } else return []
-    },
-    isIcon() {
-      if (this.options && !this.icon === 'clear') return 'dropdown'
-      if (this.options && this.icon === 'clear') {
-        if (
-          this.multiple &&
-          (Array.isArray(this.inputValue) && this.inputValue.length)
-        )
-          return 'clear'
-        else if (this.inputLabel.length && !this.multiple) return 'clear'
-        else return 'dropdown'
-      }
-      if (this.options) return 'dropdown'
-      return this.icon
     },
     setPlaceholder() {
       if (this.placeholder && !this.options) return this.placeholder
@@ -189,6 +182,10 @@ export default {
         'vu-textfield--disabled': this.disabled,
       }
     },
+    showIcon() {
+      if (this.options) return this.options.length
+      return this.icon
+    },
     inputStyle() {
       let fontSize = this.$refs.input
         ? window
@@ -214,11 +211,30 @@ export default {
   },
 
   methods: {
+    isMobile() {
+      return 'ontouchstart' in document.documentElement
+    },
+    mobileFullscreenClose(e) {
+      if (
+        e &&
+        e.target &&
+        e.target.classList.contains('vu-textfield-container')
+      ) {
+        this.$refs.tabaway.focus()
+      }
+    },
     onFocus(e) {
       if (this.disabled) return
+      if (this.mobileFullscreen && this.isMobile()) {
+        window.scrollTo(0, 0)
+        document.body.scrollTop = 0
+        if (!this.options) {
+          document.addEventListener('click', this.mobileFullscreenClose, true)
+        }
+      }
+
       this.inputIsFocused = true
       this.isFocused = true
-      if (this.options) this.showDropdown = true
       if (this.options && !this.multiple) {
         this._searchInput = JSON.parse(JSON.stringify(this.searchInput))
         this._inputValue = JSON.parse(JSON.stringify(this.inputValue))
@@ -229,6 +245,9 @@ export default {
     onBlur(e) {
       this.isFocused = false
       this.inputIsFocused = false
+      if (this.mobileFullscreen && !this.options && this.isMobile()) {
+        document.removeEventListener('click', this.mobileFullscreenClose, true)
+      }
     },
     onInput({ target }) {
       if (this.type === 'number') {
@@ -244,11 +263,8 @@ export default {
         this.emitValue()
       }
     },
-    onClick() {
-      if (this.disabled) return
-      this.$refs.input.focus()
-    },
     onClear() {
+      console.log('clear')
       if (this.disabled) return
       if (this.multiple) {
         this.inputValue.splice(0, this.inputValue.length)
@@ -259,18 +275,11 @@ export default {
       this.searchInput = ''
       this.$refs.input.value = ''
       this.emitValue()
-      this.showDropdown = false
-      this.$refs.tabaway.focus()
+      this.$refs.input.focus()
     },
-    toggleDropdown() {
+    onDropdown() {
       if (this.disabled) return
-      if (this.isIcon === 'clear') {
-        this.onClear()
-        return
-      }
-      this.showDropdown = !this.showDropdown
-      if (!this.isFocused) this.$refs.tabaway.focus()
-      if (this.showDropdown) this.$refs.input.focus()
+      this.$refs.input.focus()
     },
     onCloseDropdown(value = false) {
       const result = this.$refs.select.isResult
@@ -296,7 +305,7 @@ export default {
       }
 
       this.emitValue()
-      this.showDropdown = false
+      if (this.isMobileFullscreen) this.$refs.tabaway.focus()
     },
     emitValue() {
       this.isDirty = true
@@ -373,6 +382,8 @@ export default {
     readonly: Boolean,
     required: Boolean,
     size: Number,
+    value: null,
+    icon: String,
     optionLabel: {
       type: String,
       default: () => 'label',
@@ -381,42 +392,37 @@ export default {
       type: String,
       default: () => 'value',
     },
-    value: null,
     type: {
       type: String,
       default: () => 'text',
     },
-    iconTransition: String,
-    iconShow: {
-      type: Boolean,
-      default: () => true,
-    },
-    iconName: String,
-    iconFn: Function,
-    icon: String,
   },
 }
 </script>
 
 <style lang="stylus">
+.v-body-look
+  overflow hidden
+  height 100%
+  width 100%
+  position fixed
+
 .vu-textfield-container
   display flex
   flex 1 0 auto
   width 100%
   flex-direction column
-  transition --transition()
 
   &::before
-    pointer-events none
     opacity 0
     content ''
     display block
     position fixed
-    background rgba(#fff)
+    background rgba(#000)
     top 0
     left 0
     width 100vw
-    height 100vh
+    height 100%
     z-index -1
 
   &--fullscreen
@@ -428,12 +434,11 @@ export default {
     background #fff
 
     .vu-textfield-container__label-container, .vu-textfield, .vu-wrapper, .vu-textfield-container__error
-      z-index 99999
       background #fff
       position relative
 
     &::before
-      opacity 1
+      opacity 0.8
 
   &--disabled
     pointer-events none

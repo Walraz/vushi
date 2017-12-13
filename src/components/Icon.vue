@@ -33,4 +33,5 @@ export default {
 <style lang="stylus">
 .vu-icon
   font-size 1.25em
+  user-select none
 </style>

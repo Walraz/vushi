@@ -1,10 +1,10 @@
 <template lang="pug">
   .flex
     div(style="width: 100%")
-    Textfield(label="Label" placeholder="Välj ett alternativ"  icon="clear" selectTab :options="options" v-model="selected" multiple autosuggestion)
-    Textfield(label="Husdjur" placeholder="Välj ett alternativ"  required icon="clear" selectTab :options="optionsArray" v-model="selected2" autosuggestion)
+    Textfield(mobileFullscreen autofocus icon="clear" required label="Label" placeholder="Välj ett alternativ" selectTab :options="options" v-model="selected" multiple autosuggestion)
+    Textfield(mobileFullscreen label="Husdjur" placeholder="Välj ett alternativ"  required icon="clear" selectTab :options="optionsArray" v-model="selected2" autosuggestion)
     Textfield(mobileFullscreen icon="clear" autosuggestion :options="optionsArray" v-model="selected2" label="Husdjur")
-    Textfield(mobileFullscreen label="Label" type="email" :validate="validationEmail" placeholder="Write..." required icon="clear" v-model="text")
+    Textfield(mobileFullscreen label="Label" type="password" :validate="validationEmail" placeholder="Write..." required icon="visibility" v-model="text")
     //- MyButton(fullWidth) Spara händelse
     //- MyButton(disabled) Spara händelse
     //- MyButton(@click="toggleLoading") Spara händelse

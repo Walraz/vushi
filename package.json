@@ -9,14 +9,13 @@
     "type": "git",
     "url": "https://github.com/Walraz/vushi"
   },
-  "files": [
-    "dist",
-    "src"
-  ],
+  "files": ["dist", "src"],
   "scripts": {
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --content-base docs --open --hot --inline --progress --config build/webpack.config.js",
+    "dev":
+      "cross-env NODE_ENV=development webpack-dev-server --content-base docs --open --hot --host 0.0.0.0 --inline --progress --config build/webpack.config.js",
     "prebuild": "npm run clean_dist",
-    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules --config build/webpack.config.js",
+    "build":
+      "cross-env NODE_ENV=production webpack --progress --hide-modules --config build/webpack.config.js",
     "clean_dist": "rm -rf dist"
   },
   "dependencies": {
@@ -63,11 +62,7 @@
     "node": ">= 4.0.0",
     "npm": ">= 3.0.0"
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
-  ],
+  "browserslist": ["> 1%", "last 2 versions", "not ie <= 8"],
   "keywords": [
     "ui",
     "ui library",

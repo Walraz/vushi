@@ -26,6 +26,7 @@ $size = 1em
   flex-shrink 0
   align-items center
   justify-content center
+  user-select none
 
   &__svg
     animation vu-animation--rotate 2s linear infinite

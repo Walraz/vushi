@@ -207,7 +207,7 @@ export default {
 <style lang="stylus">
 .vu-textfield-select
   position absolute
-  top calc(100% + 2px)
+  top calc(100% + 1px)
   left 0
   list-style-type none
   box-shadow 0 8px 16px rgba(#000, 0.1)
