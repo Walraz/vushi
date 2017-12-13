@@ -2,9 +2,10 @@
   .flex
     div(style="width: 100%")
     Textfield(mobileFullscreen autofocus icon="clear" required label="Label" placeholder="Välj ett alternativ" selectTab :options="options" v-model="selected" multiple autosuggestion)
-    Textfield(mobileFullscreen label="Husdjur" placeholder="Välj ett alternativ"  required icon="clear" selectTab :options="optionsArray" v-model="selected2" autosuggestion)
+    Textfield(mobileFullscreen label="Husdjur" placeholder="Välj ett alternativ" required icon="clear" selectTab :options="optionsArray" v-model="selected2" autosuggestion)
     Textfield(mobileFullscreen icon="clear" autosuggestion :options="optionsArray" v-model="selected2" label="Husdjur")
-    Textfield(mobileFullscreen label="Label" type="password" :validate="validationEmail" placeholder="Write..." required icon="visibility" v-model="text")
+    Textfield(mobileFullscreen label="Label" type="password" placeholder="Write..." required icon="visibility" v-model="text")
+    Textfield(mobileFullscreen label="Email" type="email" v-model="text")
     //- MyButton(fullWidth) Spara händelse
     //- MyButton(disabled) Spara händelse
     //- MyButton(@click="toggleLoading") Spara händelse
@@ -80,7 +81,7 @@ export default {
   mounted() {
     // this.selected = []
     setTimeout(() => {
-      this.selected = [1]
+      this.selected = [false]
       // this.selected2 = null
       this.options = [
         { id: 1, label: 'Car', value: { car: true } },

@@ -121,6 +121,7 @@ export default {
       }
       if (keyCode === 13) {
         if (this.multiple) {
+          if (this.$parent.isMobileFullscreen) this.closeDropdown()
           if (this.optionList.length) {
             this.$refs[`item${this.selectedIndex}`][0].select()
           } else this.closeDropdown()

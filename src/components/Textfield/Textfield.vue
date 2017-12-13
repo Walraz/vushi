@@ -357,14 +357,13 @@ export default {
       }
     },
     isValue() {
-      if (this.options && this.options.length) {
+      if (this.options) {
         if (this.multiple && this.value.length) {
           const result = this.value.every(v => {
             return this.parseOptionArray(this.options).some(o =>
               objectEqual(o[this.optionValue], v),
             )
           })
-          console.log(result)
           if (result) return this.onItemSelect(this.value)
           else {
             this.inputValue = []
