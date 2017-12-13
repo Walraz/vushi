@@ -21,7 +21,7 @@
         @blur="onBlur"
         @keydown.delete="removeLastItem"
         @keydown.esc="$refs.input.blur"
-        @keydown.enter="$refs.tabaway.focus()"
+        @keydown.enter="inputOnEnter"
         :style="inputStyle"
         :placeholder="setPlaceholder"
         :disabled="disabled"
@@ -264,7 +264,6 @@ export default {
       }
     },
     onClear() {
-      console.log('clear')
       if (this.disabled) return
       if (this.multiple) {
         this.inputValue.splice(0, this.inputValue.length)
@@ -280,6 +279,10 @@ export default {
     onDropdown() {
       if (this.disabled) return
       this.$refs.input.focus()
+    },
+    inputOnEnter() {
+      if (this.options) return
+      this.$refs.tabaway.focus()
     },
     onCloseDropdown(value = false) {
       const result = this.$refs.select.isResult
@@ -355,8 +358,19 @@ export default {
     },
     isValue() {
       if (this.options && this.options.length) {
-        if (this.multiple && this.value.length)
-          return this.onItemSelect(this.value)
+        if (this.multiple && this.value.length) {
+          const result = this.value.every(v => {
+            return this.parseOptionArray(this.options).some(o =>
+              objectEqual(o[this.optionValue], v),
+            )
+          })
+          console.log(result)
+          if (result) return this.onItemSelect(this.value)
+          else {
+            this.inputValue = []
+            return this.emitValue()
+          }
+        }
         const result = this.parseOptionArray(this.options).find(o =>
           objectEqual(o[this.optionValue], this.value),
         )

@@ -80,7 +80,7 @@ export default {
   mounted() {
     // this.selected = []
     setTimeout(() => {
-      this.selected = [false]
+      this.selected = [1]
       // this.selected2 = null
       this.options = [
         { id: 1, label: 'Car', value: { car: true } },
