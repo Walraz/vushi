@@ -83,6 +83,7 @@ export default {
 
   methods: {
     isFocused(index) {
+      if (this.$parent.isMobile()) return
       return this.selectedIndex === index
     },
     isSelected(label) {
@@ -140,16 +141,6 @@ export default {
         this.closeDropdown()
         this.$parent.$refs.tabaway.focus()
       }
-      if (keyCode === 9) {
-        if (this.optionList.length === 1 && this.selectTab) {
-          if (this.multiple) {
-            this.$refs[`item${this.selectedIndex}`][0].select()
-            this.closeDropdown()
-          } else this.onClick(this.optionList[0])
-        } else {
-          this.closeDropdown()
-        }
-      }
     },
     parseOptionArray(value) {
       if (!value.length) return
@@ -185,7 +176,6 @@ export default {
 
   props: {
     value: null,
-    selectTab: Boolean,
     autosuggestion: Boolean,
     multiple: Boolean,
     options: Array,

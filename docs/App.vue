@@ -1,12 +1,24 @@
 <template lang="pug">
-  .flex
-    div(style="width: 100%")
-    Textfield(mobileFullscreen autofocus icon="clear" required label="Label" placeholder="Välj ett alternativ" selectTab :options="options" v-model="selected" multiple autosuggestion)
-    Textfield(mobileFullscreen label="Husdjur" placeholder="Välj ett alternativ" required icon="clear" selectTab :options="optionsArray" v-model="selected2" autosuggestion)
-    Textfield(mobileFullscreen icon="clear" autosuggestion :options="optionsArray" v-model="selected2" label="Husdjur")
-    Textfield(mobileFullscreen label="Label" type="password" placeholder="Write..." required icon="visibility" v-model="text")
-    Textfield(mobileFullscreen label="Email" type="email" v-model="text")
-    //- MyButton(fullWidth) Spara händelse
+  Grid(:size="2" :gutter="16" between gridCenter maxWidth="500")
+    Cell
+      Textfield(mobileFullscreen icon="clear" required label="Label" placeholder="Välj ett alternativ" :options="options" v-model="selected" multiple autosuggestion)
+    Cell
+      Textfield(mobileFullscreen label="Husdjur" placeholder="Välj ett alternativ" required icon="clear" :options="optionsArray" v-model="selected2" autosuggestion)
+    Cell
+      Textfield(mobileFullscreen icon="clear" autosuggestion :options="optionsArray" v-model="selected2" label="Husdjur")
+    Cell(center :pa="8" )
+      Checkbox(v-model="check" checkValue="Blue" label="Accpetera")
+    Cell
+      Textfield(mobileFullscreen label="Label" type="password" placeholder="Write..." required icon="visibility" v-model="text2")
+    Cell
+      Textfield(mobileFullscreen label="Email" type="email" v-model="text")
+    Cell
+      MyButton(@click="submit") Validera
+    Cell
+      Grid(end)
+        Cell(style="font-size: 32px")
+          Spinner
+        h1 {{ validText }}
     //- MyButton(disabled) Spara händelse
     //- MyButton(@click="toggleLoading") Spara händelse
     //- MyButton(:loading="loading" @click="toggleLoading" primary)
@@ -31,6 +43,8 @@
 
 
 <script>
+import Cell from '../src/components/Cell'
+import Grid from '../src/components/Grid'
 import Textfield from '../src/components/Textfield'
 import MyButton from './MyButton'
 import Spinner from '../src/components/Spinner'
@@ -41,6 +55,8 @@ export default {
   name: 'app',
 
   components: {
+    Cell,
+    Grid,
     Checkbox,
     MyButton,
     Spinner,
@@ -50,6 +66,7 @@ export default {
 
   data() {
     return {
+      validText: '',
       validationEmail: {
         email: {
           message: 'Noo...',
@@ -65,6 +82,7 @@ export default {
       selected2: 'item 2',
       validated: false,
       text: '',
+      text2: '',
       loading: false,
       multiple: [],
       model: {
@@ -92,14 +110,15 @@ export default {
   },
 
   methods: {
+    submit() {
+      if (this.$_isValid()) this.validText = 'OK'
+      else this.validText = 'error'
+    },
     iconFn() {
       console.log('custom icon function')
     },
     onClear() {
       console.log('clear')
-    },
-    submit() {
-      this.validated = !this.validated
     },
     toggleLoading() {
       this.loading = !this.loading
@@ -107,12 +126,3 @@ export default {
   },
 }
 </script>
-
-<style lang="stylus">
-.flex
-  position relative
-  display flex
-  align-items flex-start
-  flex-wrap wrap
-  margin 0
-</style>

@@ -51,7 +51,6 @@
         :autosuggestion="autosuggestion"
         :optionLabel="optionLabel"
         :optionValue="optionValue"
-        :selectTab="selectTab"
         :size="size"
         @select="onItemSelect"
         @close="onCloseDropdown"
@@ -64,10 +63,11 @@
       ref="tabaway"
       tabindex="-1"
     )
-  transition(name="vuFadeBottom")
-    .vu-textfield-container__error(v-if="isError")
-      Icon.vu-textfield-container__error--icon info_outline
-      | {{ $_validate.message }}
+  .vu-textfield-container__error-container
+    transition(name="vuFadeBottom")
+      .vu-textfield-container__error(v-if="isError")
+        Icon.vu-textfield-container__error--icon info_outline
+        | {{ $_validate.message }}
 </template>
 
 <script>
@@ -187,12 +187,7 @@ export default {
       return this.icon
     },
     inputStyle() {
-      let fontSize = this.$refs.input
-        ? window
-            .getComputedStyle(this.$refs.input, null)
-            .getPropertyValue('font-size')
-        : 0
-      fontSize = parseFloat(fontSize || 2)
+      const fontSize = 8
       let inputTextLength = 0
       if (!this.multiple && this.options) {
         inputTextLength = this.searchInput.length
@@ -205,6 +200,7 @@ export default {
       const containerWidth = this.$el ? this.$el.clientWidth - 44 : 2
       const inputWidth = inputTextLength * fontSize + fontSize
       return {
+        minWidth: `${fontSize * this.setPlaceholder.length}px`,
         width: `${inputWidth < containerWidth ? inputWidth : containerWidth}px`,
       }
     },
@@ -225,6 +221,7 @@ export default {
     },
     onFocus(e) {
       if (this.disabled) return
+      this.isDirty = false
       if (this.mobileFullscreen && this.isMobile()) {
         window.scrollTo(0, 0)
         document.body.scrollTop = 0
@@ -243,10 +240,15 @@ export default {
       }
     },
     onBlur(e) {
+      this.isDirty = true
       this.isFocused = false
       this.inputIsFocused = false
       if (this.mobileFullscreen && !this.options && this.isMobile()) {
         document.removeEventListener('click', this.mobileFullscreenClose, true)
+      }
+      if (this.options) {
+        this.isValue()
+        this.onCloseDropdown()
       }
     },
     onInput({ target }) {
@@ -311,7 +313,6 @@ export default {
       if (this.isMobileFullscreen) this.$refs.tabaway.focus()
     },
     emitValue() {
-      this.isDirty = true
       this.$emit('input', this.inputValue)
     },
     removeLastItem() {
@@ -381,7 +382,6 @@ export default {
   props: {
     mobileFullscreen: Boolean,
     label: String,
-    selectTab: Boolean,
     autosuggestion: Boolean,
     multiple: Boolean,
     options: Array,
@@ -460,6 +460,9 @@ export default {
     height 24px
     position relative
     z-index 1
+
+  &__error-container
+    height 24px
 
   &__error
     font-size 12px
