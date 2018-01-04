@@ -1,10 +1,10 @@
 <template lang="pug">
-  label(:class="wrapperClasses")
-    input(:class="inputClasses" type="checkbox" :disabled="disabled" :value="checkValue" v-model="inputValue" ref="checkbox" tabindex="-1")
-    div(:class="containerClasses" ref="checkbox" :tabindex="tabindex"  @keydown.enter="select")
-      div(:class="markClasses")
+  label.vu-checkbox(:class="{ 'vu-checkbox--disabled' : disabled }")
+    input.vu-checkbox__input(type="checkbox" :disabled="disabled" :value="checkValue" v-model="inputValue" ref="checkbox" tabindex="-1")
+    .vu-checkbox__container(:class="containerClasses" ref="checkbox" :tabindex="tabindex"  @keydown.enter="select")
+      .vu-checkbox__mark(:class="markClasses")
         Icon check
-    div(:class="labelClasses" v-if="label" v-html="label")
+    .vu-checkbox__label(v-if="label" v-html="label")
 </template>
 
 <script>
@@ -15,12 +15,6 @@ export default {
 
   components: {
     Icon,
-  },
-
-  data() {
-    return {
-      toggle: false,
-    }
   },
 
   methods: {
@@ -46,39 +40,17 @@ export default {
         this.$emit('input', value)
       },
     },
-    inputClasses() {
-      return ['vu-checkbox__input', this.toggle && 'vu-toggle__input']
-    },
-    wrapperClasses() {
-      return [
-        'vu-checkbox',
-        this.toggle && 'vu-toggle',
-        this.disabled && 'vu-checkbox--disabled',
-        this.toggle && this.disabled && 'vu-toggle--disabled',
-      ]
-    },
-    labelClasses() {
-      return ['vu-checkbox__label', this.toggle && 'vu-toggle__label']
-    },
     containerClasses() {
-      return [
-        'vu-checkbox__container',
-        this.toggle && 'vu-toggle__container',
-        this.isMarked && 'vu-checkbox__container--active',
-        this.toggle && this.isMarked && 'vu-toggle__container--active',
-        this.disabled && 'vu-checkbox__container--disabled',
-        this.toggle && this.disabled && 'vu-toggle__container--disabled',
-      ]
+      return {
+        'vu-checkbox__container--active': this.isMarked,
+        'vu-checkbox__container--disabled': this.disabled,
+      }
     },
     markClasses() {
-      return [
-        'vu-checkbox__mark',
-        this.toggle && 'vu-toggle__mark',
-        this.isMarked && 'vu-checkbox__mark--active',
-        this.disabled && 'vu-checkbox__mark--disabled',
-        this.toggle && this.isMarked && 'vu-toggle__mark--active',
-        this.toggle && this.disabled && 'vu-toggle__mark--disabled',
-      ]
+      return {
+        'vu-checkbox__mark--active': this.isMarked,
+        'vu-checkbox__mark--disabled': this.disabled,
+      }
     },
   },
 
@@ -121,14 +93,13 @@ export default {
 
   &__label
     font-size 14px
-    padding-left 8px
-    padding-right 16px
+    padding-left 16px
 
   &__container
     width 1em
     height 1em
     font-size 20px
-    border 2px solid rgba(#000, 0.2)
+    border 1px solid rgba(#000, 0.2)
 
     &:focus
       border-color $primary-color

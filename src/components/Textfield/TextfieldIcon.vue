@@ -3,7 +3,7 @@
     transition(name="vuDropdown" mode="out-in")
       Icon(@click="visibilityFn" class="vu-textfield-icon--pointer" v-if="icon === 'visibility' && visibilityShow" :key="visibilityShow") visibility
       Icon(@click="visibilityFn" class="vu-textfield-icon--pointer" v-else-if="icon === 'visibility' && !visibilityShow") visibility_off
-      Icon(@click="clearFn" v-else-if="clearShow" :key="clearShow" class="vu-textfield-icon--pointer") clear
+      Icon(@click="clearFn" v-else-if="clearShow" :key="clearShow" class="vu-textfield-icon--pointer") cancel
       Icon(@click="dropdownFn" v-else-if="!clearShow && $parent.options && !$parent.inputIsFocused" :key="$parent.inputIsFocused" class="vu-textfield-icon--pointer") keyboard_arrow_down
       Icon(@click="dropdownFn" v-else-if="!clearShow && $parent.options && $parent.inputIsFocused" class="vu-textfield-icon--pointer") keyboard_arrow_up
 </template>
@@ -30,6 +30,12 @@ export default {
       return this.iconTransition
     },
     clearShow() {
+      if (
+        this.icon === 'clear' &&
+        this.$parent.multiple &&
+        this.$parent.inputValue.length
+      )
+        return true
       return this.icon === 'clear' && this.$parent.searchInput.length > 0
     },
     visibilityShow() {

@@ -4,6 +4,8 @@ export default {
       return this.$_validate.error && this.$_validateOn
     },
     $_validate() {
+      if (this.type === 'time' && !this.validate.time) this.validate.time = true
+      if (this.type === 'date' && !this.validate.date) this.validate.date = true
       if (this.type === 'email' && !this.validate.email)
         this.validate.email = true
       if (this.pattern && !this.validate.pattern)
@@ -87,6 +89,20 @@ export default {
       return {
         error: !pattern.test(value),
         message: `Felaktig email address`,
+      }
+    },
+    $_time(type, value) {
+      const pattern = new RegExp(
+        /(^([0-9]|[0-1][0-9]|[2][0-3]):([0-5][0-9])$)|(^([0-9]|[1][0-9]|[2][0-3])$)/,
+      )
+      return { error: !pattern.test(value), message: `Felaktig tid format` }
+    },
+    $_date(type, value) {
+      console.log(value)
+      const pattern = new RegExp(/(\d{4})-(\d{2})-(\d{2})/)
+      return {
+        error: !pattern.test(value),
+        message: `Felaktig datum format`,
       }
     },
   },

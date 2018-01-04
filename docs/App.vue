@@ -3,46 +3,45 @@
     Cell
       Textfield(mobileFullscreen icon="clear" required label="Label" placeholder="Välj ett alternativ" :options="options" v-model="selected" multiple autosuggestion)
     Cell
+      Textfield(mobileFullscreen icon="clear" required label="Label" placeholder="Välj ett alternativ" :options="options" v-model="selected" multiple autosuggestion)
+    Cell
       Textfield(mobileFullscreen label="Husdjur" placeholder="Välj ett alternativ" required icon="clear" :options="optionsArray" v-model="selected2" autosuggestion)
     Cell
       Textfield(mobileFullscreen icon="clear" autosuggestion :options="optionsArray" v-model="selected2" label="Husdjur")
     Cell(center :pa="8" )
-      Checkbox(v-model="check" checkValue="Blue" label="Accpetera")
+      Checkbox(v-model="check" checkValue="Blue" label="Blue")
+      Radio(v-model="check" radioValue="Blue" label="Blue")
+      Radio(v-model="check" radioValue="White" label="White")
+    Cell(center :pa="8" )
+      Toggle(v-model="check" checkValue="Blue" label="Accpetera")
     Cell
       Textfield(mobileFullscreen label="Label" type="password" placeholder="Write..." required icon="visibility" v-model="text2")
     Cell
       Textfield(mobileFullscreen label="Email" type="email" v-model="text")
     Cell
+      Textfield(mobileFullscreen label="Datepicker" v-model="date" icon="clear" placeholder="yyyy-mm-dd")
+        Calendar(v-model="date")
+    Cell
+      Textfield(label="Datepicker" type="date" v-model="date")
+    Cell
+      Textfield(label="Time" type="time" v-model="time")
+    Cell
+      Textfield(autogrow textarea v-model="text" required label="Textarea")
+    Cell
       MyButton(@click="submit") Validera
     Cell
       Grid(end)
-        Cell(style="font-size: 32px")
-          Spinner
         h1 {{ validText }}
-    //- MyButton(disabled) Spara händelse
-    //- MyButton(@click="toggleLoading") Spara händelse
-    //- MyButton(:loading="loading" @click="toggleLoading" primary)
-    //-   Icon(slot="icon") close
-    //-   | Hämtar
-    //- MyButton(fab)
-    //-   Icon bookmark
-    //- Textfield(label="Label" v-model="model.username" placeholder="Placeholder")
-    //- Textfield(label="Label" v-model="model.password" type="password" icon="visibility")
-    //- Textfield(style="min-width: 300px" max-length="4" required label="Label" v-model="model.name" icon="clear" :validateOn="validated" :validate="{ required: true, maxLength: 3 }")
-    //- MyButton(@click="submit")
-    //-   | Validate
-    //- MyTextfield(v-model="model.name" :validate="{ includesChar: '.' }")
-    //- MyTextfield(autosuggestion icon="clear" :options="options" label="Select" :validate="{required: true}" v-model="selected")
-    //- MyTextfield(:options="optionsArray" autosuggestion icon="clear" label="Select" v-model="selected2")
-    //- MyTextfield(:options="options" icon="clear" label="Select" :validate="{required: true}" v-model="selected")
-    //- MyTextfield(:options="optionsArray" icon="clear" label="Select" v-model="selected2")
-    //- Checkbox(disabled v-model="check" checkValue="Red" label="Red")
-    //- Checkbox(v-model="check" checkValue="Blue")
-    //- Checkbox(disabled v-model="CheckBool")
+    Grid
+      Calendar(v-model="date")
 </template>
 
 
 <script>
+import Calendar from '../src/components/Calendar'
+import Radio from '../src/components/Radio'
+import MyToggle from './MyToggle'
+import Toggle from '../src/components/Toggle'
 import Cell from '../src/components/Cell'
 import Grid from '../src/components/Grid'
 import Textfield from '../src/components/Textfield'
@@ -55,6 +54,10 @@ export default {
   name: 'app',
 
   components: {
+    Calendar,
+    Radio,
+    MyToggle,
+    Toggle,
     Cell,
     Grid,
     Checkbox,
@@ -66,6 +69,8 @@ export default {
 
   data() {
     return {
+      time: null,
+      date: null,
       validText: '',
       validationEmail: {
         email: {
@@ -101,6 +106,7 @@ export default {
     setTimeout(() => {
       this.selected = [false]
       // this.selected2 = null
+      // this.date = '2017-12-12'
       this.options = [
         { id: 1, label: 'Car', value: { car: true } },
         { id: 2, label: 'Nej', value: false },

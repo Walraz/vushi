@@ -31,3 +31,10 @@
 
 .vuDropdown-enter, .vuDropdown-leave-to
   transform rotate(45deg) scale(0.45)
+
+.vuFadeLeft-enter-active, .vuFadeLeft-leave-active
+  transition --transition(), --transition(opacity)
+
+.vuFadeLeft-enter, .vuFadeLeft-leave-to
+  transform translateX(-8px)
+  opacity 0

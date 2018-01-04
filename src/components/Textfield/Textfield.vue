@@ -13,7 +13,24 @@
           .vu-textfield__item(:class="{ 'vu-textfield__item--disabled' : disabled }")
             span {{ item[optionLabel] }}
             Icon(@click.prevent.stop="onItemRemove($index)" v-if="!disabled") close
+      textarea.vu-textfield__input.vu-textfield__textarea.vu-scrollbar(
+        v-if="textarea"
+        ref="input"
+        tabindex="0"
+        @input="onInput"
+        @focus="onFocus"
+        @blur="onBlur"
+        @keydown.esc="$refs.input.blur"
+        :style="textareaStyle"
+        :placeholder="setPlaceholder"
+        :disabled="disabled"
+        :maxlength="maxlength"
+        :readonly="isReadonly"
+        :required="required"
+        :value="searchInput"
+      )
       input.vu-textfield__input(
+        v-if="!textarea"
         ref="input"
         tabindex="0"
         @input="onInput"
@@ -22,6 +39,7 @@
         @keydown.delete="removeLastItem"
         @keydown.esc="$refs.input.blur"
         @keydown.enter="inputOnEnter"
+        @keydown.tab="onTab"
         :style="inputStyle"
         :placeholder="setPlaceholder"
         :disabled="disabled"
@@ -42,6 +60,9 @@
         @clear="onClear"
         @dropdown="onDropdown"
       )
+    transition(name="vuFadeBottom")
+      .vu-textfield__dropdown-container(@mousedown.prevent slot="dropdown" v-if="$slots.default && showDropdownSlot")
+        slot
     transition(name="vuFadeBottom")
       TextfieldSelect(
         v-if="options && inputIsFocused"
@@ -98,13 +119,36 @@ export default {
       inputLabel: '',
       searchInput: '',
       isDirty: false,
+      inputHeight: null,
+      initInputHeight: null,
+      inputPaddingTop: null,
+      inputMaxHeight: null,
+      showDropdownSlot: false,
     }
   },
 
   mounted() {
-    this.$refs.input.type = this.type
+    if (!this.textarea) this.$refs.input.type = this.type
+    if (this.$slots.default && this.type === 'date')
+      this.$refs.input.type = 'search'
     this.isValue()
     if (this.autofocus) this.$refs.input.focus()
+    if (this.textarea) {
+      this.$nextTick(() => {
+        const inputStyle = window.getComputedStyle(this.$refs.input, null)
+        let inputHeight = inputStyle.getPropertyValue('height')
+        this.inputPaddingTop = parseFloat(
+          inputStyle.getPropertyValue('padding-top') || 0,
+        )
+        inputHeight = parseFloat(inputHeight) || 0
+        if (this.rows > 1)
+          this.initInputHeight = inputHeight + inputHeight / 4 * this.rows
+        else this.initInputHeight = inputHeight
+        this.inputHeight = this.initInputHeight
+
+        this.inputMaxHeight = inputHeight + inputHeight / 4 * this.maxrows
+      })
+    }
   },
 
   beforeDestroy() {
@@ -156,7 +200,11 @@ export default {
       else return ''
     },
     isReadonly() {
-      return this.readonly || (this.options && !this.autosuggestion)
+      return (
+        this.readonly ||
+        (this.options && !this.autosuggestion) ||
+        this.$slots.default
+      )
     },
     labelClasses() {
       return {
@@ -167,13 +215,17 @@ export default {
       }
     },
     floatLabel() {
+      if (this.type !== 'search' && this.type !== 'text') return true
       if (this.inputIsFocused) return true
       if (this.setPlaceholder.length) return true
       if (this.options)
         return this.multiple
           ? Boolean(this.inputValue.length)
           : Boolean(this.inputLabel.length)
-      if (!this.options) return Boolean(this.value.length)
+      if (!this.options)
+        return Boolean(
+          typeof this.value !== 'string' ? this.value : this.value.length > 0,
+        )
     },
     textfieldClassed() {
       return {
@@ -185,6 +237,12 @@ export default {
     showIcon() {
       if (this.options) return this.options.length
       return this.icon
+    },
+    textareaStyle() {
+      return {
+        maxHeight: `${this.inputMaxHeight}px`,
+        height: `${this.inputHeight}px`,
+      }
     },
     inputStyle() {
       const fontSize = 8
@@ -207,6 +265,26 @@ export default {
   },
 
   methods: {
+    onTab() {
+      setTimeout(() => {
+        if (this.$slots.default && !this.inputIsFocused) {
+          this.showDropdownSlot = false
+          document.removeEventListener('click', this.dropdownSlot, true)
+        }
+      }, 100)
+    },
+    dropdownSlot(e) {
+      if (e && !this.$el.contains(e.target)) {
+        this.showDropdownSlot = false
+        document.removeEventListener('click', this.dropdownSlot, true)
+      }
+    },
+    autoGrow() {
+      this.$refs.input.style.height = `${this.initInputHeight -
+        this.inputPaddingTop}px`
+      this.$refs.input.style.height = `${this.$refs.input.scrollHeight +
+        this.inputPaddingTop}px`
+    },
     isMobile() {
       return 'ontouchstart' in document.documentElement
     },
@@ -221,11 +299,17 @@ export default {
     },
     onFocus(e) {
       if (this.disabled) return
+
+      if (this.$slots.default) {
+        this.showDropdownSlot = true
+        document.addEventListener('click', this.dropdownSlot, true)
+      }
+
       this.isDirty = false
       if (this.mobileFullscreen && this.isMobile()) {
         window.scrollTo(0, 0)
         document.body.scrollTop = 0
-        if (!this.options) {
+        if (!this.options && !this.$slots.default) {
           document.addEventListener('click', this.mobileFullscreenClose, true)
         }
       }
@@ -243,15 +327,13 @@ export default {
       this.isDirty = true
       this.isFocused = false
       this.inputIsFocused = false
+      if (this.options) this.searchInput = ''
       if (this.mobileFullscreen && !this.options && this.isMobile()) {
         document.removeEventListener('click', this.mobileFullscreenClose, true)
       }
-      if (this.options) {
-        this.isValue()
-        this.onCloseDropdown()
-      }
     },
     onInput({ target }) {
+      if (this.textarea && this.autogrow) this.autoGrow()
       if (this.type === 'number') {
         if (this.min && parseInt(target.value, 10) < this.min)
           return (this.$refs.input.value = this.searchInput)
@@ -283,6 +365,7 @@ export default {
       this.$refs.input.focus()
     },
     inputOnEnter() {
+      if (this.$slots.default) this.onTab()
       if (this.options) return
       this.$refs.tabaway.focus()
     },
@@ -375,6 +458,17 @@ export default {
           objectEqual(o[this.optionValue], this.value),
         )
         if (result) this.onItemSelect(result)
+        else {
+          this.inputValue = ''
+          this.inputLabel = ''
+          this.searchInput = ''
+          this.$refs.input.value = ''
+        }
+      } else {
+        const parseValue = typeof this.value === 'string' ? this.value : ''
+        this.searchInput = parseValue
+        this.inputValue = parseValue
+        this.emitValue()
       }
     },
   },
@@ -397,6 +491,16 @@ export default {
     size: Number,
     value: null,
     icon: String,
+    autogrow: Boolean,
+    textarea: Boolean,
+    maxrows: {
+      tyoe: Number,
+      default: () => 6,
+    },
+    rows: {
+      type: Number,
+      default: () => 1,
+    },
     optionLabel: {
       type: String,
       default: () => 'label',
@@ -490,6 +594,17 @@ export default {
   cursor text
   transition --transition(border-bottom), --transition(box-shadow)
 
+  &__dropdown-container
+    position absolute
+    top calc(100% + 1px)
+    left 0
+    list-style-type none
+    box-shadow 0 8px 16px rgba(#000, 0.1)
+    min-width 100%
+    z-index 99
+    background #fff
+    overflow-y scroll
+
   &__spinner
     font-size 1em
     padding 8px
@@ -575,6 +690,10 @@ export default {
       padding 0 4px
       cursor default
 
+  &__textarea
+    resize none
+    padding-top 12px
+
   &__input
     caret-color $primary-color
     font-size 16px
@@ -585,6 +704,12 @@ export default {
     display inline-flex
     flex 1 0 auto
     font-family inherit
+
+  &__input[type='date']
+    -webkit-appearance none
+    -moz-appearance none
+    -ms-appearance none
+    -o-appearance none
 
     &:disabled
       color $disabled-color
