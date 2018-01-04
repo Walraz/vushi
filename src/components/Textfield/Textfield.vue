@@ -61,7 +61,7 @@
         @dropdown="onDropdown"
       )
     transition(name="vuFadeBottom")
-      .vu-textfield__dropdown-container(@mousedown.prevent slot="dropdown" v-if="$slots.default && showDropdownSlot")
+      .vu-textfield__dropdown-container(@mousedown.prevent v-if="$slots.default && showDropdownSlot")
         slot
     transition(name="vuFadeBottom")
       TextfieldSelect(
