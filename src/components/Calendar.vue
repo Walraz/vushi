@@ -40,9 +40,9 @@
         .vu-calendar__days-container(:key="currentMonth")
           .vu-calendar__days(v-for="(row, $index) in createCalendarArray" :key="$index")
             .vu-calendar__day(:class="{ 'vu-calendar__day--disabled' : !day.currentMonth }" @click="selectDate(day)" v-for="(day, $day) in row" :key="$day")
-              .vu-calendar__day__day-text(:class="{ 'vu-calendar__day__day-text--today' : isToday(day.date), 'vu-calendar__day__day-text--selected' : isSelected(day) }") {{ day.date }}
+              .vu-calendar__day__day-text(:class="{ 'vu-calendar__day__day-text--today' : isToday(day.date) && day.currentMonth, 'vu-calendar__day__day-text--selected' : isSelected(day) && day.currentMonth }") {{ day.date }}
               transition(name="vuScale" appear)
-                .vu-calendar__day__today(v-if="isToday(day.date)")
+                .vu-calendar__day__today(v-if="isToday(day.date) && day.currentMonth")
               transition(name="vuScale" appear)
                 .vu-calendar__day__selected(v-if="isSelected(day)")
 </template>
