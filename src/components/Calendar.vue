@@ -31,7 +31,7 @@
             .vu-calendar__controls__container__icon
               Icon(@click="nextMonth") keyboard_arrow_right
           .vu-calendar__controls__container__icon(v-else)
-            Icon(@click="openYearMonthControls") close
+            Icon(@click="openYearMonthControls" v-if="!yearMonthPicker") close
 
     .vu-calendar__days-header
       span(v-for="day in days") {{ parseDayText(day) }}
@@ -87,7 +87,7 @@ export default {
   data() {
     return {
       touchEvent: null,
-      showYearMonthControls: false,
+      showYearMonthControls: this.yearMonthPicker,
       currentMonth: null,
       currentYear: null,
       today: new Date(),
@@ -253,6 +253,7 @@ export default {
   },
 
   props: {
+    yearMonthPicker: Boolean,
     value: null,
     min: String,
     max: String,

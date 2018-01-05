@@ -33,7 +33,7 @@
       Grid(end)
         h1 {{ validText }}
     Grid
-      Calendar(v-model="date")
+      Calendar(v-model="date" yearMonthPicker)
 </template>
 
 
