@@ -6,7 +6,7 @@
           .vu-calendar__year-month__years
             .vu-calendar__year-month__years__year(
               v-for="(year, $year) in years"
-              @click="currentYear = year"
+              @click="setYear(year)"
               :data-year="year"
               :class="{ 'vu-calendar__year-month__years__year--selected' : year === currentYear }"
               :key="$year") {{ year }}
@@ -14,7 +14,7 @@
             .vu-calendar__year-month__months__month(
               v-for="(month, $month) in months"
               :key="$month"
-              @click="currentMonth = $month"
+              @click="setMonth($month)"
               :class="{ 'vu-calendar__year-month__months__month--selected' : $month === currentMonth }"
               )
               span {{ month }}
@@ -123,6 +123,24 @@ export default {
   },
 
   methods: {
+    setMonth(month) {
+      this.currentMonth = month
+      if (!this.yearMonthPicker) return
+      this.$emit(
+        'input',
+        `${this.currentYear || new Date().getFullYear()}-${this.currentMonth +
+          1}`,
+      )
+    },
+    setYear(year) {
+      this.currentYear = year
+      if (!this.yearMonthPicker) return
+      this.$emit(
+        'input',
+        `${this.currentYear}-${this.currentMonth + 1 ||
+          new Date().getMonth() + 1}`,
+      )
+    },
     swipe({ touchendX, touchstartX }) {
       const threshold = 50
       if (touchendX + threshold <= touchstartX) {
