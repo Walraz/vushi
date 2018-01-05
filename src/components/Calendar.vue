@@ -129,7 +129,7 @@ export default {
       this.$emit(
         'input',
         `${this.currentYear || new Date().getFullYear()}-${this.currentMonth +
-          1}`,
+          1}-01`,
       )
     },
     setYear(year) {
@@ -138,7 +138,7 @@ export default {
       this.$emit(
         'input',
         `${this.currentYear}-${this.currentMonth + 1 ||
-          new Date().getMonth() + 1}`,
+          new Date().getMonth() + 1}-01`,
       )
     },
     swipe({ touchendX, touchstartX }) {
