@@ -120,26 +120,36 @@ export default {
       this.swipe.bind(this),
     )
     this.touchEvent.init()
+    this.$nextTick(() => {
+      const yearEl = this.$el.querySelector(`[data-year="${this.currentYear}"]`)
+      yearEl.scrollIntoView()
+    })
   },
 
   methods: {
     setMonth(month) {
       this.currentMonth = month
       if (!this.yearMonthPicker) return
+      const parsedMonth =
+        this.currentMonth.toString().length === 1
+          ? `0${this.currentMonth + 1}`
+          : this.currentMonth + 1
+
       this.$emit(
         'input',
-        `${this.currentYear || new Date().getFullYear()}-${this.currentMonth +
-          1}-01`,
+        `${this.currentYear || new Date().getFullYear()}-${parsedMonth}-01`,
       )
     },
     setYear(year) {
       this.currentYear = year
       if (!this.yearMonthPicker) return
-      this.$emit(
-        'input',
-        `${this.currentYear}-${this.currentMonth + 1 ||
-          new Date().getMonth() + 1}-01`,
-      )
+      this.currentMonth = this.currentMonth || new Date().getMonth()
+      const parsedMonth =
+        this.currentMonth.toString().length === 1
+          ? `0${this.currentMonth + 1}`
+          : this.currentMonth + 1
+
+      this.$emit('input', `${this.currentYear}-${parsedMonth}-01`)
     },
     swipe({ touchendX, touchstartX }) {
       const threshold = 50
