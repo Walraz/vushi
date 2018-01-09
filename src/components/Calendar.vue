@@ -130,11 +130,9 @@ export default {
     setMonth(month) {
       this.currentMonth = month
       if (!this.yearMonthPicker) return
+      const currentMonth = this.currentMonth + 1
       const parsedMonth =
-        this.currentMonth.toString().length === 1
-          ? `0${this.currentMonth + 1}`
-          : this.currentMonth + 1
-
+        currentMonth.toString().length === 1 ? `0${currentMonth}` : currentMonth
       this.$emit(
         'input',
         `${this.currentYear || new Date().getFullYear()}-${parsedMonth}-01`,
@@ -143,11 +141,13 @@ export default {
     setYear(year) {
       this.currentYear = year
       if (!this.yearMonthPicker) return
-      this.currentMonth = this.currentMonth || new Date().getMonth()
+      const currentMonth =
+        this.currentMonth !== null
+          ? this.currentMonth + 1
+          : new Date().getMonth() + 1
+
       const parsedMonth =
-        this.currentMonth.toString().length === 1
-          ? `0${this.currentMonth + 1}`
-          : this.currentMonth + 1
+        currentMonth.toString().length === 1 ? `0${currentMonth}` : currentMonth
 
       this.$emit('input', `${this.currentYear}-${parsedMonth}-01`)
     },
