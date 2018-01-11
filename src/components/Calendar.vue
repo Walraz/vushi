@@ -121,6 +121,7 @@ export default {
     )
     this.touchEvent.init()
     this.$nextTick(() => {
+      if (!this.yearMonthPicker) return
       const yearEl = this.$el.querySelector(`[data-year="${this.currentYear}"]`)
       yearEl.scrollIntoView()
     })
@@ -162,7 +163,6 @@ export default {
       }
     },
     openYearMonthControls() {
-      if (!this.yearMonthPicker) return
       this.showYearMonthControls = !this.showYearMonthControls
       this.$nextTick(() => {
         const yearEl = this.$el.querySelector(

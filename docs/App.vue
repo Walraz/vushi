@@ -19,8 +19,8 @@
     Cell
       Textfield(mobileFullscreen label="Email" type="email" v-model="text")
     Cell
-      Textfield(mobileFullscreen label="Datepicker" v-model="date" icon="clear" placeholder="yyyy-mm-dd")
-        Calendar(v-model="date" yearMonthPicker)
+      Textfield(label="Datepicker" v-model="date" icon="clear" placeholder="yyyy-mm-dd")
+        Calendar(v-model="date")
     Cell
       Textfield(label="Datepicker" type="date" v-model="date")
     Cell
