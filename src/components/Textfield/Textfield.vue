@@ -36,6 +36,7 @@
         @input="onInput"
         @focus="onFocus"
         @blur="onBlur"
+        @change="onChange"
         @keydown.delete="removeLastItem"
         @keydown.esc="$refs.input.blur"
         @keydown.enter="inputOnEnter"
@@ -265,6 +266,9 @@ export default {
   },
 
   methods: {
+    onChange(e) {
+      this.$emit('change', e)
+    },
     onTab() {
       setTimeout(() => {
         if (this.$slots.default && !this.inputIsFocused) {
@@ -494,7 +498,7 @@ export default {
     autogrow: Boolean,
     textarea: Boolean,
     maxrows: {
-      tyoe: Number,
+      type: Number,
       default: () => 6,
     },
     rows: {
